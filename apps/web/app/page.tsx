@@ -1,102 +1,88 @@
+'use client'
 import Image, { type ImageProps } from "next/image";
-import { Button } from "@repo/ui/button";
-import styles from "./page.module.css";
 
-type Props = Omit<ImageProps, "src"> & {
-  srcLight: string;
-  srcDark: string;
-};
 
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+// Update the path as needed
 
+import { useState } from "react";
+import { CustomCheckbox } from "@/components/ui/checkbox";
+export default function LandingPage() {
+  const [contentType, setContentType] = useState("");
+  const options = [
+    { id: "podcast", label: "Podcasts", value: "PODCAST" },
+    { id: "interview", label: "Interview", value: "INTERVIEW" },
+    { id: "videochat", label: "Video Chat", value: "VIDEOCHAT" },
+    { id: "webinar", label: "Webinar", value: "WEBINAR" },
+  ];
   return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
-  );
-};
+    
+    <div className="bg-gray-200 min-h-screen">
+<div className=" rounded-xl pt-5 mx-96 p-3">
+  <div className="flex justify-between">
+    <div>
+      <h1 className="text-2xl text-blue-700 font-inter font-bold ml-3">Podly</h1>
+    </div>
+    <div className="flex font-inter font-semibold text-[#020202] text-xl gap-7">
+      <h1><Link href='/pricing'>Pricing</Link></h1>
+      <h1><Link href='/login'>Login</Link></h1>
+    </div>
+  </div>
 
-export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <ThemeImage
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>apps/web/app/page.tsx</code>
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  {/* Line below the navbar */}
+  <div className="h-[1px] bg-gray-300 mt-3"></div>
+</div>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new/clone?demo-description=Learn+to+implement+a+monorepo+with+a+two+Next.js+sites+that+has+installed+three+local+packages.&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4K8ZISWAzJ8X1504ca0zmC%2F0b21a1c6246add355e55816278ef54bc%2FBasic.png&demo-title=Monorepo+with+Turborepo&demo-url=https%3A%2F%2Fexamples-basic-web.vercel.sh%2F&from=templates&project-name=Monorepo+with+Turborepo&repository-name=monorepo-turborepo&repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fturborepo%2Ftree%2Fmain%2Fexamples%2Fbasic&root-directory=apps%2Fdocs&skippable-integrations=1&teamSlug=vercel&utm_source=create-turbo"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  <div className="ml-[46%] mt-14 ">
+  <Image
+        src="https://shuttle.zip/images/homepage/icon.webp"
+        alt="Shuttle Icon"
+        width={90}
+        height={90}
+      />
+     
+    </div>
+     <div className="ml-[28%] mt-5">
+     <h1 className="text-7xl font-bold tracking-tighter font-inter">Create Your Ultimate</h1>
+     <h1 className="text-7xl -mt-3 font-bold tracking-tighter font-inter"> <span className="text-blue-700"> piece </span> of content <span className="text-blue-700">.</span></h1>
+<p className="mt-5 text-2xl font-light font-inter tracking-tight">Your online studio to record in high quality,  edit in a flash, and go
+<br /> live with a bang. Not necessarily in that order.</p>
+
+<p className="mt-8 text-md underline font-light font-inter tracking-tight">What would you like to start creating?</p>
+    <div>
+    <div className=" mt-5">
+      
+
+      <div className="flex gap-3">
+        {options.map((option) => (
+          <div key={option.id} className="flex items-center space-x-2">
+            <CustomCheckbox
+              id={option.id}
+              checked={contentType === option.value}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  setContentType(option.value);
+                }
+              }}
+              
             />
-            Deploy now
-          </a>
-          <a
-            href="https://turborepo.com/docs?utm_source"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-        <Button appName="web" className={styles.secondary}>
-          Open alert
-        </Button>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com/templates?search=turborepo&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://turborepo.com?utm_source=create-turbo"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to turborepo.com →
-        </a>
-      </footer>
+            <Label
+              htmlFor={option.id}
+              className="flex items-center gap-1.5 cursor-pointer"
+            >
+              <span className="font-inter uppercase  text-md">{option.label}</span>
+            </Label>
+          </div>
+        ))}
+      </div>
+    </div>
+    </div>
+    <div>
+      <Button className="ml-48 mt-8 bg-blue-700 font-bold tracking-wide border-black text-xl pt-2 pb-2 rounded-lg font-inter">Start For Free</Button>
+    </div>
+      </div>
     </div>
   );
 }

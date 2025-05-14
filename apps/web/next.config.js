@@ -1,4 +1,8 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {};
+// next.config.js (as ESM)
+const nextConfig = {
+  images: {
+    domains: ['shuttle.zip'],
+  },
+};
 
 export default nextConfig;
