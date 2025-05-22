@@ -3,10 +3,11 @@
 import { useParams } from "next/navigation"
 import { useContext, useEffect } from "react"
 import { SocketContext } from "../../Context/SocketContext"
+import UserFleedPlayer from "@/components/UserFleedPlayer"
 
 export default function room(){
     const {id} = useParams()
-    const {socket,user} = useContext(SocketContext)
+    const {socket,user,stream} = useContext(SocketContext)
     
     useEffect(()=>{
        
@@ -15,6 +16,7 @@ export default function room(){
     return (
 <>
 room : {id}
+<UserFleedPlayer stream={stream}/>
 </>
     )
 }
