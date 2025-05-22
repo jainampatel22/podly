@@ -17,6 +17,9 @@ const joinedRoom = ({roomId,peerId}:IRoomParams)=> {
     console.log("new user has joined room ",roomId,"with peer id as",peerId)
     rooms[roomId].push(peerId)
     socket.join(roomId)
+    socket.on("ready",()=>{
+        socket.to(roomId).emit('user-joined',{peerId})
+    })
     }
     
 }

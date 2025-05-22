@@ -7,7 +7,7 @@ import UserFleedPlayer from "@/components/UserFleedPlayer"
 
 export default function room(){
     const {id} = useParams()
-    const {socket,user,stream} = useContext(SocketContext)
+    const {socket,user,stream,peers} = useContext(SocketContext)
     
     useEffect(()=>{
        
@@ -15,8 +15,20 @@ export default function room(){
     },[id,user,socket])
     return (
 <>
-room : {id}
+<div>
+room : {id} <br />
 <UserFleedPlayer stream={stream}/>
+<div>
+    other user feed:
+    {
+        Object.keys(peers).map((peerId)=>(
+            <>
+<UserFleedPlayer stream={peers[peerId].stream} key={peerId}/>
+            </>
+   ) )
+    }
+</div></div>
+
 </>
     )
 }
