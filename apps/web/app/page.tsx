@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 // Update the path as needed
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { CustomCheckbox } from "@/components/ui/checkbox";
+import { SocketContext } from "./Context/SocketContext";
 export default function LandingPage() {
+const {socket} = useContext(SocketContext)
   const [contentType, setContentType] = useState("");
   const options = [
     { id: "podcast", label: "Podcasts", value: "PODCAST" },
@@ -17,6 +19,10 @@ export default function LandingPage() {
     { id: "videochat", label: "Video Chat", value: "VIDEOCHAT" },
     { id: "webinar", label: "Webinar", value: "WEBINAR" },
   ];
+  const initRoom =()=>{
+    console.log("initializing new room")
+    socket.emit("create-room")
+  }
   return (
     
     <div className="bg-gray-200 min-h-screen">
@@ -80,7 +86,7 @@ export default function LandingPage() {
     </div>
     </div>
     <div>
-      <Button className="ml-48 mt-8 bg-blue-700 font-bold tracking-wide border-black text-xl pt-2 pb-2 rounded-lg font-inter">Start For Free</Button>
+      <Button className="ml-48 mt-8 bg-blue-700 font-bold tracking-wide border-black text-xl pt-2 pb-2 rounded-lg font-inter" onClick={initRoom}>Start For Free</Button>
     </div>
       </div>
     </div>
