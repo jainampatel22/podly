@@ -17,7 +17,7 @@ io.on("connection",(socket)=>{
     console.log("new user connected")
 roomHandler(socket)
     socket.on("disconnect",()=>{
-        console.log("user disconnected")
+        console.log("user")
     })
 }
 )
