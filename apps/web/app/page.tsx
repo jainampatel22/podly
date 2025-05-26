@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useContext, useState } from "react";
 import { CustomCheckbox } from "@/components/ui/checkbox";
 import { SocketContext } from "./Context/SocketContext";
+import Header from "@/components/Header";
 export default function LandingPage() {
 const {socket} = useContext(SocketContext)
   const [contentType, setContentType] = useState("");
@@ -26,22 +27,9 @@ const {socket} = useContext(SocketContext)
   return (
     
     <div className="bg-gray-200 min-h-screen">
-<div className=" rounded-xl pt-5 mx-96 p-3">
-  <div className="flex justify-between">
-    <div>
-      <h1 className="text-2xl text-blue-700 font-inter font-bold ml-3">Podly</h1>
-    </div>
-    <div className="flex font-inter font-semibold text-[#020202] text-xl gap-7">
-      <h1><Link href='/pricing'>Pricing</Link></h1>
-      <h1><Link href='/login'>Login</Link></h1>
-    </div>
-  </div>
+<Header/>
 
-  {/* Line below the navbar */}
-  <div className="h-[1px] bg-gray-300 mt-3"></div>
-</div>
-
-  <div className="ml-[46%] mt-14 ">
+  <div className="ml-[45%] mt-14 ">
   <Image
         src="https://shuttle.zip/images/homepage/icon.webp"
         alt="Shuttle Icon"
@@ -50,7 +38,7 @@ const {socket} = useContext(SocketContext)
       />
      
     </div>
-     <div className="ml-[28%] mt-5">
+     <div className="ml-[22%] mt-5">
      <h1 className="text-7xl font-bold tracking-tighter font-inter">Create Your Ultimate</h1>
      <h1 className="text-7xl -mt-3 font-bold tracking-tighter font-inter"> <span className="text-blue-700"> piece </span> of content <span className="text-blue-700">.</span></h1>
 <p className="mt-5 text-2xl font-light font-inter tracking-tight">Your online studio to record in high quality,  edit in a flash, and go
@@ -86,7 +74,7 @@ const {socket} = useContext(SocketContext)
     </div>
     </div>
     <div>
-      <Button className="ml-48 mt-8 bg-blue-700 font-bold tracking-wide border-black text-xl pt-2 pb-2 rounded-lg font-inter" onClick={initRoom}>Start For Free</Button>
+      <Button className="ml-48 mt-8 bg-blue-700 font-bold tracking-tight border-black text-xl pt-4 pb-4 rounded-lg font-inter" onClick={initRoom}>Start For Free</Button>
     </div>
       </div>
     </div>

@@ -23,6 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+   
    <ClientWrapper>
      <html lang="en">
       <body>
@@ -32,5 +33,6 @@ export default function RootLayout({
       </body>
     </html>
    </ClientWrapper>
+   
   );
 }
