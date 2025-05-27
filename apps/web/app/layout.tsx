@@ -25,11 +25,12 @@ export default function RootLayout({
   return (
    
    <ClientWrapper>
+  
      <html lang="en">
       <body>
-       
+        
           {children}
-       
+   
       </body>
     </html>
    </ClientWrapper>
