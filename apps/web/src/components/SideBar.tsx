@@ -8,6 +8,7 @@ import {
   Search,
   Settings,
   PartyPopper,
+  Menu
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import {
@@ -35,11 +36,18 @@ export default function Sidebar() {
   ];
 
   return (
-    <>
-    
+    <div>
+        <Menu
+  className={`bg-white rounded-xl p-1 fixed top-10 left-4 cursor-pointer z-20
+    transition-opacity duration-300 ease-in-out
+    ${isOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+  size={25}
+  onClick={() => setIsOpen(true)}
+/>
     <div
-    className={`bg-black text-white min-h-screen fixed top-0 left-0 transition-[width] duration-500 ease-in-out ${isOpen ? "w-[200px]" : "w-1"} overflow-hidden`}
-
+   className={`bg-black  text-white min-h-screen fixed top-0 left-0 overflow-hidden
+  transition-[width] duration-1000 ease-in-out
+  ${isOpen ? "w-[250px]" : "w-5"}`}
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
@@ -102,6 +110,6 @@ export default function Sidebar() {
         )}
       </div>
     </div>
-    </>
+    </div>
   );
 }
