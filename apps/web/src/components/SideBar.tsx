@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   Calendar,
@@ -8,7 +8,8 @@ import {
   Search,
   Settings,
   PartyPopper,
-  Menu
+  Menu,
+  Link
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import {
@@ -22,26 +23,31 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
   const userInitial = session?.user?.name?.trim().charAt(0).toUpperCase();
-
+const [activeItem,SetActiveItem]=useState("Home")
   const items = [
-    { title: "Home", url: "#", icon: Home },
-    { title: "Projects", url: "#", icon: Inbox },
-    { title: "Calendar", url: "#", icon: Calendar },
-    { title: "Scheduled", url: "#", icon: Search },
+    { title: "Home", url: "/home", icon: Home },
+    { title: "Projects", url: "/explore/myprojects", icon: Inbox },
+    { title: "Calendar", url: "/explore/calendar", icon: Calendar },
+    { title: "Scheduled", url: "/explore/schedule", icon: Search },
+  ];
+const router = useRouter()
+  const endIcons = [
+    { title: "Settings", url: "/settings", icon: Settings },
+    { title: "What's New ?", url: "/updates", icon: PartyPopper },
   ];
 
-  const endIcons = [
-    { title: "Settings", url: "#", icon: Settings },
-    { title: "What's New ?", url: "#", icon: PartyPopper },
-  ];
+    function handleMenuClick(title: string,url:string): void {
+      SetActiveItem(title)
+      router.push(url)
+    }
 
   return (
     <div>
         <Menu
-  className={`bg-white rounded-xl p-1 fixed top-10 left-4 cursor-pointer z-20
+  className={`bg-black text-white  rounded-xl p-1 fixed top-10 left-4 cursor-pointer z-20
     transition-opacity duration-300 ease-in-out
     ${isOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
-  size={25}
+  size={30}
   onClick={() => setIsOpen(true)}
 />
     <div
@@ -65,24 +71,24 @@ export default function Sidebar() {
       )}
 
       {/* Menu Items */}
-      <div className="mt-14 ml-5 space-y-7">
+      <div className="mt-20 ml-5 space-y-7">
         {items.map((item, idx) => (
+          
           <div
-            key={idx}
-            className="flex items-center gap-3 cursor-pointer hover:text-gray-300"
-          >
-            <item.icon size={24} />
+            key={idx} onClick={() => handleMenuClick(item.title,item.url)}
+            className={`flex items-center gap-3 cursor-pointer hover:text-gray-300 transition-colors ${activeItem==item.title?"text-blue-700 ":"text-white"}` } >
+                      <item.icon size={24} />
             {isOpen && <span className="font-inter text-lg">{item.title}</span>}
           </div>
         ))}
       </div>
 
       {/* Footer Icons */}
-      <div className="mt-40 ml-5 space-y-5">
+      <div className="mt-36 ml-5 space-y-5">
         {endIcons.map((item, idx) => (
           <div
-            key={idx}
-            className="flex items-center gap-2 cursor-pointer hover:text-gray-300"
+            key={idx} onClick={() => handleMenuClick(item.title,item.url)}
+            className={`flex items-center gap-3 cursor-pointer hover:text-gray-300 transition-colors ${activeItem==item.title?"text-blue-700 ":"text-white"}` }
           >
             <item.icon size={24} />
             {isOpen && (

@@ -30,7 +30,7 @@ export default function Header(){
     </div>
     <div className="flex font-inter font-semibold text-[#020202] text-xl gap-7">
       <h1><Link href='/pricing'>Pricing</Link></h1>
-      <h1><Link href='/explore'>Explore</Link></h1>
+      <h1><Link href='/explore/home'>Explore</Link></h1>
     </div>
   </div>
 
