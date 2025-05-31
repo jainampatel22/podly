@@ -9,10 +9,14 @@ export default function UserFleedPlayer({stream}:{stream:MediaStream}){
     },[stream])
 return (
     <>
-    <video
-    ref={videoRef} style={{width:"500px",height:"500px"}}
-    muted autoPlay
-    />
+   <div className="rounded-xl overflow-hidden" >
+  <video
+    ref={videoRef} style={{ width: "500px", height: "500px" }}
+    className=" object-cover"
+    muted
+    autoPlay
+  />
+</div>
     </>
 )
 }

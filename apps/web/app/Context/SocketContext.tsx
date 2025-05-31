@@ -20,7 +20,7 @@ export const SocketProvider:React.FC<Props>=({children})=>{
 const [user,SetUser]=useState<Peer>()
 const [stream,SetStream]=useState<MediaStream>()
     const [peers, dispatch] = useReducer(peerReducer, {}); 
-
+const totalParticipants =Object.keys(peers).length+1
 
 const fetchUserStream =async ()=>{
  const stream=   await navigator.mediaDevices.getUserMedia({video:true,audio:false})
@@ -63,7 +63,7 @@ user.on("call",(call)=>{
 socket.emit('ready')
 },[user,stream])
 return (
-<SocketContext.Provider value={{socket,user,stream,peers}}>
+<SocketContext.Provider value={{socket,user,stream,peers,totalParticipants}}>
   {children}
 </SocketContext.Provider>
     )

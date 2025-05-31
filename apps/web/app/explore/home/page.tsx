@@ -6,7 +6,7 @@ import { getServerSession } from 'next-auth'
 import { Button } from '@/components/ui/button'
 import { ArrowRight,Upload,Calendar,Radio,ScissorsLineDashed,Disc} from 'lucide-react'
 import VideoHover from '@/components/VideoHover'
-
+import Link from 'next/link'
 export default async function  Explore(){
 
 
@@ -15,9 +15,15 @@ if(!session){
     redirect('/sign-in')
 }
 
+const fetchstudioName = session?.user?.name
+const studioName = (fetchstudioName ?? "user-studio").trim().toLowerCase().replace(/\s+/g, '-');
+
+
 return (<>
+
 <div className='flex bg-black min-h-screen'>
     <Sidebar/>
+    
     
 <Button className="flex mt-12 mx-auto items-center gap-2 bg-black border shadow-xl border-white rounded-2xl text-sm font-anzo py-1 px-3 hover:bg-gray-800 text-white border border-gray-500 relative md:ml-[37%] md:text-xl md:px-5 md:gap-3">
    <span className='font-inter'>Welcome to <span className='text-blue-700'>Podly</span></span>
@@ -29,9 +35,12 @@ return (<>
 
 <div className="mt-1  cursor-pointer items-center">
     <div className="w-12 h-12  border  border-red-600 hover:border hover:border-red-800 rounded-full flex items-center justify-center bg-transparent">
+  <Link href={`/studio/${studioName}-studio`}>
     <Disc className="text-red-600 hover:text-red-800 " size={24} />
+</Link>
   </div>
-<h1 className='font-inter text-white mt-1   text-md '>Record</h1>
+  <h1 className='font-inter text-white mt-1   text-md '>Record</h1>
+
 </div>
 
 
@@ -62,10 +71,14 @@ return (<>
 </div>
 
 </div>
-<div className="text-center mt-14 text-white">
-      <h1 className="font-inter font-semibold text-xl">AI tools</h1>
+<div className="text-center mt-14 bg-black  text-white">
+      <h1 className="font-inter  font-semibold text-2xl">AI tools</h1>
 
       <VideoHover/>
     </div>
+    <div className='bg-black h-10'>
+
+    </div>
+    
 </>)
 }
