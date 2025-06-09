@@ -48,14 +48,14 @@ export default function HostStream() {
         !stream ? (<>
          <Button
         onClick={showVideo}
-        className="w-96  -ml-[57%] font-inter text-lg bg-blue-700 hover:bg-blue-900"
+        className="w-96  -ml-[69%] font-inter text-lg bg-blue-700 hover:bg-blue-900"
       >
       Check
       </Button>
         </>):(<>
          <Button
         onClick={initRoom}
-        className="w-96  -ml-[57%] font-inter text-lg bg-blue-700 hover:bg-blue-900" 
+        className="w-96  -ml-[69%] font-inter text-lg bg-blue-700 hover:bg-blue-900" 
       >
       Join Studio
       </Button>
@@ -68,7 +68,7 @@ export default function HostStream() {
           <video
             ref={videoRef}
             autoPlay
-            muted
+            muted style={{transform:"scaleX(-1)"}}
             playsInline
             className="w-full h-full object-cover"
           />

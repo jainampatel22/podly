@@ -31,7 +31,7 @@ return (<>
 </Button>
 
 </div>
-<div className='-mt-[48%] ml-[27%] flex gap-14'>
+<div className='-mt-[37%] ml-[27%] flex gap-14'>
 
 <div className="mt-1  cursor-pointer items-center">
     <div className="w-12 h-12  border  border-red-600 hover:border hover:border-red-800 rounded-full flex items-center justify-center bg-transparent">
@@ -71,8 +71,8 @@ return (<>
 </div>
 
 </div>
-<div className="text-center mt-14 bg-black  text-white">
-      <h1 className="font-inter  font-semibold text-2xl">AI tools</h1>
+<div className=" mt-14 bg-black  text-white">
+      <h1 className="font-inter ml-[42%]  font-semibold text-2xl">AI tools</h1>
 
       <VideoHover/>
     </div>
