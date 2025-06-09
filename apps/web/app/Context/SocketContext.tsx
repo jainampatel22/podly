@@ -6,97 +6,137 @@ import {v4 as UUIDv4} from 'uuid'
 import Peer from 'peerjs'
 import { peerReducer } from '../Reducers/peerReducer'
 import { addPeerAction } from '../Actions/peerAction'
-const ws_local = "http://localhost:8080"
-export const SocketContext = createContext<any |null >(null)
-const socket = SocketIoClient(ws_local)
 
+const ws_local = "http://localhost:8080"
+
+export const SocketContext = createContext<any | null>(null)
+
+const socket = SocketIoClient(ws_local)
 
 interface Props {
     children: React.ReactNode
 }
 
-export const SocketProvider:React.FC<Props>=({children})=>{
-const [myPeerId, setMyPeerId] = useState<string | null>(null);
+export const SocketProvider: React.FC<Props> = ({children}) => {
+    const [myPeerId, setMyPeerId] = useState<string | null>(null);
+    const [user, SetUser] = useState<Peer>()
+    const [stream, SetStream] = useState<MediaStream>()
+    const [peers, dispatch] = useReducer(peerReducer, {});
 
-const [user,SetUser]=useState<Peer>()
-const [stream,SetStream]=useState<MediaStream>()
-    const [peers, dispatch] = useReducer(peerReducer, {}); 
-const totalParticipants =Object.keys(peers).length+1
+    const totalParticipants = Object.keys(peers).length + 1
 
-const fetchUserStream =async ()=>{
- const stream=   await navigator.mediaDevices.getUserMedia({video:true,audio:true})
- SetStream(stream)
-}
+    const fetchUserStream = async () => {
+        const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true})
+        SetStream(stream)
+    }
 
-const router = useRouter()
-useEffect(()=>{
-    const userId = UUIDv4()
-    const newPeer  = new Peer(userId,{
-         host: "0.peerjs.com",
-          port: 443,
-          path: "/",
-          secure: true,
+    const router = useRouter()
 
-    })
-    SetUser(newPeer)
-    setMyPeerId(userId)
-fetchUserStream()
-const enterRoom =({roomId}:{roomId:string})=>{
-    router.push(`/room/${roomId}`)
-}
-socket.on("room-created",enterRoom)
-},[])
+    useEffect(() => {
+        const userId = UUIDv4()
+        const newPeer = new Peer(userId, {
+            host: "0.peerjs.com",
+            port: 443,
+            path: "/",
+            secure: true,
+        })
+        SetUser(newPeer)
+        setMyPeerId(userId)
+        fetchUserStream()
 
-useEffect(() => {
-  const handleUsername = ({ peerId, username }: { peerId: string; username: string }) => {
-    dispatch({
-      type: "UPDATE_PEER_USERNAME",
-      payload: { peerId, username },
-    });
-    console.log(username)
-  };    
+        const enterRoom = ({roomId}: {roomId: string}) => {
+            router.push(`/room/${roomId}`)
+        }
 
-  socket.on('username', handleUsername);
+        socket.on("room-created", enterRoom)
 
-  return () => {
-    socket.off('username', handleUsername); // wrap in arrow function to return `void`
-  };
-}, [socket]);
+        return () => {
+            socket.off("room-created", enterRoom)
+        }
+    }, [])
 
+    // Handle incoming usernames from other peers
+    useEffect(() => {
+        const handlePeerUsername = ({ peerId, username }: { peerId: string; username: string }) => {
+            console.log('Received peer username:', { peerId, username })
+            dispatch({
+                type: "UPDATE_PEER_USERNAME",
+                payload: { peerId, username },
+            });
+        };
 
-useEffect(()=>{
-if(!user || !stream) return
-socket.on('user-joined',({peerId})=>{
-const call = user.call(peerId,stream)
-console.log("calling the new peer",peerId)
-call.on('stream',(remoteStream)=>{
-    dispatch(addPeerAction(peerId,remoteStream))
-})
-})
-user.on("call",(call)=>{
-    call.answer(stream)
-    call.on('stream',(remoteStream)=>{
-        dispatch(addPeerAction(call.peer,remoteStream))
-    })
-})
-socket.on('video-toggle',({peerId,isVideoOff})=>{
-    dispatch({
-        type:"UPDATE_PEER_VIDEO_STATUS",
-        payload:{peerId,isVideoOff}
-    })
-})
+        // Handle existing users when joining a room
+        const handleExistingUsers = (existingUsers: {peerId: string, username?: string}[]) => {
+            console.log('Received existing users:', existingUsers)
+            existingUsers.forEach(user => {
+                if (user.username) {
+                    dispatch({
+                        type: "UPDATE_PEER_USERNAME",
+                        payload: { peerId: user.peerId, username: user.username },
+                    });
+                }
+            })
+        }
 
+        socket.on('peer-username', handlePeerUsername);
+        socket.on('existing-users', handleExistingUsers);
 
-socket.emit('ready')
-return () => {
-    socket.off('user-joined');
-    socket.off('video-toggle');
-    user.off('call');
-  };
-},[user,stream])
-return (
-<SocketContext.Provider value={{myPeerId,socket,user,stream,peers,totalParticipants}}>
-  {children}
-</SocketContext.Provider>
+        return () => {
+            socket.off('peer-username', handlePeerUsername);
+            socket.off('existing-users', handleExistingUsers);
+        };
+    }, [socket]);
+
+    useEffect(() => {
+        if (!user || !stream) return
+
+        const handleUserJoined = ({peerId}: {peerId: string}) => {
+            const call = user.call(peerId, stream)
+            console.log("calling the new peer", peerId)
+            call.on('stream', (remoteStream) => {
+                dispatch(addPeerAction(peerId, remoteStream))
+            })
+        }
+
+        const handleCall = (call: any) => {
+            call.answer(stream)
+            call.on('stream', (remoteStream: MediaStream) => {
+                dispatch(addPeerAction(call.peer, remoteStream))
+            })
+        }
+
+        const handleVideoToggle = ({peerId, isVideoOff}: {peerId: string, isVideoOff: boolean}) => {
+            dispatch({
+                type: "UPDATE_PEER_VIDEO_STATUS",
+                payload: {peerId, isVideoOff}
+            })
+        }
+
+        const handleUserLeft = ({peerId}: {peerId: string}) => {
+            dispatch({
+                type: "REMOVE_PEER",
+                payload: {peerId}
+            })
+        }
+
+        socket.on('user-joined', handleUserJoined)
+        socket.on('video-toggle', handleVideoToggle)
+        socket.on('user-left', handleUserLeft)
+        user.on("call", handleCall)
+
+        socket.emit('ready')
+
+        return () => {
+            socket.off('user-joined', handleUserJoined);
+            socket.off('video-toggle', handleVideoToggle);
+            socket.off('user-left', handleUserLeft);
+            user.off('call', handleCall);
+        };
+    }, [user, stream])
+
+    return (
+        <SocketContext.Provider value={{myPeerId, socket, user, dispatch,stream, peers, totalParticipants}}>
+            {children}
+        </SocketContext.Provider>
     )
 }
