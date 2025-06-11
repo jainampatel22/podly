@@ -6,11 +6,18 @@ import { FcGoogle } from "react-icons/fc"; // Google icon
 import Header from './Header';
 import SimpleHeader from './Simple-Header';
 import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 export default function AuthPage(){
   const searchParams = useSearchParams()
-
+const router = useRouter()
 const callbackUrl = searchParams.get('callbackUrl') || '/explore/home'
     const {data:session} = useSession()
+    useEffect(()=>{
+      if(session){
+        router.replace(callbackUrl)
+      }
+    },[session,callbackUrl,router])
     return(
         <div>
 {session?(<>

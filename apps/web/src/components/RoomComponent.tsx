@@ -10,21 +10,26 @@ import { Mic, MicOff, Video, PhoneOff, VideoOff } from 'lucide-react';
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { getServerSession } from "next-auth"
-
-export default function RoomComponent(){
+type RoomId = {
+    params:string
+}
+export default function RoomComponent({ params }: RoomId) {
     const [roomName, setRoomName] = useState("untitled")
-    const {id} = useParams()
+    
     const {myPeerId, socket, user, dispatch ,stream, peers, setPeers, totalParticipants} = useContext(SocketContext)
-    const {data: session} = useSession()
+    
     const [isMuted, setIsMuted] = useState(false)
     const [isVideoOff, setIsVideoOff] = useState(false)
-
+  const {data:session} = useSession()
+if(!session){
+    redirect(`/sign-in?callbackUrl=/room/${params}`)
+}
     // Join room when user is available
     useEffect(() => {
         if (user && socket) {
-            socket.emit("joined-room", {roomId: id, peerId: user._id})
+            socket.emit("joined-room", {roomId: params, peerId: user._id})
         }
-    }, [id, user, socket])
+    }, [params, user, socket])
 
     // Send username when we have all required data
     useEffect(() => {
