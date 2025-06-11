@@ -64,7 +64,7 @@ export default function HostStream() {
 
       {stream && (<>
       
-      <div className="-mt-60  ml-96 w-[350px] h-[300px]  rounded-xl relative overflow-hidden">
+      <div className="-mt-72 ml-[50%] w-[450px] h-[450px]  rounded-xl relative overflow-hidden">
           <video
             ref={videoRef}
             autoPlay
@@ -73,9 +73,7 @@ export default function HostStream() {
             className="w-full h-full object-cover"
           />
         </div>
-    <div className="absolute top-52 left-[57%] bg-black/60 font-inter text-white px-2 py-1 text-sm rounded-xl">
-720p / 30fps
-  </div>
+   
       </>
          )}
          

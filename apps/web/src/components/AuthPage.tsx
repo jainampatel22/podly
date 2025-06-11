@@ -5,8 +5,11 @@ import { Button } from './ui/button'
 import { FcGoogle } from "react-icons/fc"; // Google icon
 import Header from './Header';
 import SimpleHeader from './Simple-Header';
-
+import { useSearchParams } from 'next/navigation';
 export default function AuthPage(){
+  const searchParams = useSearchParams()
+
+const callbackUrl = searchParams.get('callbackUrl') || '/explore/home'
     const {data:session} = useSession()
     return(
         <div>
@@ -32,7 +35,7 @@ export default function AuthPage(){
   </div>
 </div>
 <div className="px-6"> {/* adds space inside the container */}
-  <Button onClick={()=>signIn("google",{callbackUrl:"/explore"})} className="bg-white border font-inter text-md hover:bg-gray-100 text-gray-800 w-full gap-2 shadow-md">
+  <Button onClick={()=>signIn("google",{callbackUrl:callbackUrl})} className="bg-white border font-inter text-md hover:bg-gray-100 text-gray-800 w-full gap-2 shadow-md">
     <FcGoogle size={20} />
     Google
   </Button>
