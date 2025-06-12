@@ -1,6 +1,7 @@
 "use client"
 import {signIn,signOut,useSession} from 'next-auth/react'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { Button } from './ui/button'
 import { FcGoogle } from "react-icons/fc"; // Google icon
 import Header from './Header';
