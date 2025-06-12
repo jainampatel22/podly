@@ -1,7 +1,7 @@
 'use client'
 
 import { redirect, useParams } from "next/navigation"
-import { useContext, useEffect, useState } from "react"
+import { use, useContext, useEffect, useRef,useState } from "react"
 import { SocketContext } from "../../app/Context/SocketContext"
 import UserFleedPlayer from "@/components/UserFleedPlayer"
 import Link from "next/link"
@@ -13,13 +13,16 @@ import { getServerSession } from "next-auth"
 type RoomId = {
     params:string
 }
-export default function RoomComponent({ params }: RoomId) {
+export default  function RoomComponent({ params }: RoomId) {
     const [roomName, setRoomName] = useState("untitled")
     
     const {myPeerId, socket, user, dispatch ,stream, peers, setPeers, totalParticipants} = useContext(SocketContext)
-    
+    const MediaRecorderRef = useRef<MediaRecorder | null>(null)
     const [isMuted, setIsMuted] = useState(false)
     const [isVideoOff, setIsVideoOff] = useState(false)
+     const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
+     const [recording, setRecording] = useState(false);
+
   const {data:session} = useSession()
 if(!session){
     redirect(`/sign-in?callbackUrl=/room/${params}`)
@@ -140,7 +143,88 @@ if(!session){
             }
         }
     }
+const RecordStream = async () => {
+    try {
+        const fullScreenStream = await navigator.mediaDevices.getDisplayMedia({
+            audio: true,
+            video: true
+        });
 
+        // Clear any existing chunks when starting new recording
+        setRecordedChunks([]);
+
+        MediaRecorderRef.current = new MediaRecorder(fullScreenStream);
+        
+        MediaRecorderRef.current.ondataavailable = (e) => {
+            if (e.data.size > 0) {
+                setRecordedChunks(prev => [...prev, e.data]);
+            }
+        };
+
+        MediaRecorderRef.current.onstop = () => {
+            // Stop all tracks to end screen sharing
+            fullScreenStream.getTracks().forEach(track => track.stop());
+            // Don't handle download here - we'll do it in useEffect
+        };
+
+        return true;
+    } catch (error) {
+        console.error('Error accessing display media:', error);
+        alert('Failed to access screen recording. Please try again.');
+        return false;
+    }
+};
+
+const startRecording = () => {
+    if (MediaRecorderRef.current && MediaRecorderRef.current.state === 'inactive') {
+        setRecording(true);
+        MediaRecorderRef.current.start(1000); // Collect data every second
+    }
+};
+
+const stopRecording = () => {
+    if (MediaRecorderRef.current && MediaRecorderRef.current.state === 'recording') {
+        MediaRecorderRef.current.stop();
+        setRecording(false);
+    }
+};
+
+const handleStartRecording = async () => {
+    const success = await RecordStream();
+    if (success) {
+        startRecording();
+    }
+};
+
+// Add this useEffect to handle the download when recording stops
+useEffect(() => {
+    if (!recording && recordedChunks.length > 0) {
+        console.log('Processing recorded chunks:', recordedChunks.length);
+        
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        
+        if (blob.size === 0) {
+            alert("No video recorded, please try again");
+            return;
+        }
+        
+        console.log('Blob size:', blob.size);
+        
+        // Create download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${roomName || 'recording'}.webm`;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        // Clean up
+        URL.revokeObjectURL(url);
+        setRecordedChunks([]);
+    }
+}, [recording, recordedChunks, roomName]);
     return (
         <>
         <div className="hidden sm:block min-h-screen bg-black flex flex-col">
@@ -241,9 +325,23 @@ if(!session){
             {/* Control Panel */}
             <div className="flex-shrink-0 p-4 sm:p-6">
                 <div className="flex items-center justify-center gap-3 sm:gap-4">
-                    <Button className="rounded-lg sm:rounded-xl bg-red-500 hover:bg-red-700 text-white font-inter px-4 sm:px-8 py-2 sm:py-4 text-sm sm:text-base">
-                        Record
-                    </Button>
+                    <Button
+  onClick={handleStartRecording}
+  disabled={recording}
+  className="rounded-lg sm:rounded-xl bg-red-500 hover:bg-red-700 text-white font-inter px-4 sm:px-8 py-2 sm:py-4 text-sm sm:text-base"
+>
+  {recording ? "Recording..." : "Start Recording"}
+</Button>
+
+{recording && (
+  <Button
+    onClick={stopRecording}
+    className="rounded-lg sm:rounded-xl bg-yellow-500 hover:bg-yellow-600 text-white font-inter px-4 sm:px-8 py-2 sm:py-4 text-sm sm:text-base"
+  >
+    Stop Recording
+  </Button>
+)}
+
 
                     <Button
                         className="rounded-lg sm:rounded-xl bg-white/10 hover:bg-white/20 text-white font-inter flex items-center justify-center p-3 sm:p-4"
