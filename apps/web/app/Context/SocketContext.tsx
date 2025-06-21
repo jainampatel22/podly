@@ -24,7 +24,8 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
     const [peers, dispatch] = useReducer(peerReducer, {});
 
     const totalParticipants = Object.keys(peers).length + 1
-
+ const [processedStream, setProcessedStream] = useState<MediaStream | null>(null);
+   
     const fetchUserStream = async () => {
         const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true})
         SetStream(stream)
@@ -90,8 +91,10 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
     useEffect(() => {
         if (!user || !stream) return
 
+        const localStream = processedStream || stream;
+
         const handleUserJoined = ({peerId}: {peerId: string}) => {
-            const call = user.call(peerId, stream)
+            const call = user.call(peerId, localStream)
             console.log("calling the new peer", peerId)
             call.on('stream', (remoteStream) => {
                 dispatch(addPeerAction(peerId, remoteStream))
@@ -99,7 +102,7 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
         }
 
         const handleCall = (call: any) => {
-            call.answer(stream)
+            call.answer(localStream)
             call.on('stream', (remoteStream: MediaStream) => {
                 dispatch(addPeerAction(call.peer, remoteStream))
             })
@@ -132,10 +135,10 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
             socket.off('user-left', handleUserLeft);
             user.off('call', handleCall);
         };
-    }, [user, stream])
+    }, [user, stream,processedStream])
 
     return (
-        <SocketContext.Provider value={{myPeerId, socket, user, dispatch,stream, peers, totalParticipants}}>
+        <SocketContext.Provider value={{setProcessedStream,myPeerId,processedStream, socket, user, dispatch,stream, peers, totalParticipants}}>
             {children}
         </SocketContext.Provider>
     )

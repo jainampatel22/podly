@@ -21,6 +21,7 @@ export default function RoomComponent({ params }: RoomId) {
     const [roomName, setRoomName] = useState("untitled")
     const videoRef = useRef<HTMLVideoElement | null>(null)
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
+    const { setProcessedStream: setContextProcessedStream } = useContext(SocketContext);
     const [processedStream, setProcessedStream] = useState<MediaStream | null>(null)
     const [modelLoaded, setModelLoaded] = useState(false)
     const [modelError, setModelError] = useState<string | null>(null)
@@ -226,7 +227,7 @@ export default function RoomComponent({ params }: RoomId) {
             // Create processed stream
             const processed = canvas.captureStream(25); // Reduced FPS for better performance
             setProcessedStream(processed);
-
+            setContextProcessedStream(processed);
             const processInterval = 1000 / 25; // 25 FPS
 
             const renderFrame = async (currentTime: number) => {
