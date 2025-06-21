@@ -7,7 +7,7 @@ import Peer from 'peerjs'
 import { peerReducer } from '../Reducers/peerReducer'
 import { addPeerAction } from '../Actions/peerAction'
 
-const ws_local = "http://localhost:8080"
+const ws_local = "https://podly-j8p7.onrender.com"
 
 export const SocketContext = createContext<any | null>(null)
 
