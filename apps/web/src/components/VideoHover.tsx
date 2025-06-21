@@ -66,7 +66,7 @@ export default function HoverVideoGrid() {
   return (
     <>
       {/* Mobile Layout - Single Column */}
-      <div className="block sm:hidden px-4 mt-5">
+      <div className="block  sm:hidden px-4 mt-5">
         <div className="flex flex-col gap-y-8 max-w-sm mx-auto">
           {data.map((item, idx) => (
             <div
@@ -95,7 +95,7 @@ export default function HoverVideoGrid() {
       </div>
 
       {/* Tablet Layout - 2 Columns */}
-      <div className="hidden sm:block lg:hidden px-6 mt-5">
+      <div className="hidden  sm:block lg:hidden px-6 mt-5">
         <div className="grid grid-cols-2 gap-6 max-w-3xl mx-auto">
           {data.map((item, idx) => (
             <div
@@ -124,7 +124,7 @@ export default function HoverVideoGrid() {
       </div>
 
       {/* Desktop Layout - Original Style with Responsive Positioning */}
-      <div className="hidden lg:block">
+      <div className=" hidden lg:block">
         {/* Centering container for desktop */}
         <div className="flex justify-center mt-5">
           <div className="flex flex-col gap-y-14 max-w-md xl:max-w-lg 2xl:max-w-xl">

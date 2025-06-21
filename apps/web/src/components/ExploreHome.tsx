@@ -1,150 +1,232 @@
 'use client'
 import { redirect } from 'next/navigation'
 import Sidebar from '@/components/SideBar'
-
 import { Button } from '@/components/ui/button'
-import { ArrowRight, Upload, Calendar, Radio, ScissorsLineDashed, Disc } from 'lucide-react'
+import { ArrowRight, Upload, Calendar, Radio, ScissorsLineDashed, Disc, Sparkles } from 'lucide-react'
 import VideoHover from '@/components/VideoHover'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 
-export default  function ExploreHome() {
-    const {data:session} = useSession()
+export default function ExploreHome() {
+  const { data: session } = useSession()
+  
   if (!session) {
     redirect('/sign-in')
   }
-   const fetchstudioName = session?.user?.name
+  
+  const fetchstudioName = session?.user?.name
   const studioName = (fetchstudioName ?? "user-studio").trim().toLowerCase().replace(/\s+/g, '-');
 
+  const actionItems = [
+    {
+      id: 'record',
+      icon: Disc,
+      label: 'Record',
+      href: `/studio/${studioName}-studio`,
+      color: 'from-red-500 to-pink-600',
+      hoverColor: 'hover:from-red-600 hover:to-pink-700',
+      shadow: 'shadow-red-500/25 hover:shadow-red-500/40'
+    },
+    {
+      id: 'edit',
+      icon: ScissorsLineDashed,
+      label: 'Edit',
+      href: '#',
+      color: 'from-purple-500 to-indigo-600',
+      hoverColor: 'hover:from-purple-600 hover:to-indigo-700',
+      shadow: 'shadow-purple-500/25 hover:shadow-purple-500/40'
+    },
+    {
+      id: 'live',
+      icon: Radio,
+      label: 'Live',
+      href: '#',
+      color: 'from-green-500 to-emerald-600',
+      hoverColor: 'hover:from-green-600 hover:to-emerald-700',
+      shadow: 'shadow-green-500/25 hover:shadow-green-500/40'
+    },
+    {
+      id: 'plan',
+      icon: Calendar,
+      label: 'Plan',
+      href: '#',
+      color: 'from-blue-500 to-cyan-600',
+      hoverColor: 'hover:from-blue-600 hover:to-cyan-700',
+      shadow: 'shadow-blue-500/25 hover:shadow-blue-500/40'
+    },
+    {
+      id: 'import',
+      icon: Upload,
+      label: 'Import',
+      href: '#',
+      color: 'from-orange-500 to-yellow-600',
+      hoverColor: 'hover:from-orange-600 hover:to-yellow-700',
+      shadow: 'shadow-orange-500/25 hover:shadow-orange-500/40'
+    }
+  ];
+
   return (
-    <div className="bg-black min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-gradient-to-br from-blue-400/20 to-purple-400/20 blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-gradient-to-br from-indigo-400/20 to-pink-400/20 blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-gradient-to-br from-cyan-400/10 to-blue-400/10 blur-3xl"></div>
+      </div>
+
       {/* Desktop Layout with Sidebar */}
-      <div className="hidden lg:flex">
+      <div className="hidden lg:flex relative z-10">
         <Sidebar />
         <div className="flex-1">
-          {/* Welcome Button - Desktop */}
+          {/* Welcome Section - Desktop */}
           <div className="flex justify-center pt-12">
-            <Button className="flex items-center gap-3 bg-black border border-white rounded-2xl text-xl font-inter py-3 px-6 hover:bg-gray-800 text-white shadow-xl">
-              <span className="font-inter">Welcome to <span className="text-blue-700">Podly</span></span>
-              <ArrowRight className="text-white w-5 h-5" />
-            </Button>
+            <div className="backdrop-blur-sm bg-white/60 border border-white/80 rounded-2xl p-6 shadow-lg shadow-blue-100/50 animate-fade-in">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-xl font-semibold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                  Welcome to <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Podly</span>
+                </span>
+                <ArrowRight className="text-slate-600 w-5 h-5" />
+              </div>
+            </div>
           </div>
 
           {/* Action Items - Desktop */}
-          <div className="flex justify-center gap-14 mt-16">
-            <div className="flex flex-col items-center cursor-pointer group">
-              <div className="w-12 h-12 border border-red-600 hover:border-red-800 rounded-full flex items-center justify-center bg-transparent">
-                <Link href={`/studio/${studioName}-studio`}>
-                  <Disc className="text-red-600 hover:text-red-800" size={24} />
-                </Link>
-              </div>
-              <h1 className="font-inter text-white mt-1 text-md">Record</h1>
-            </div>
-
-            <div className="flex flex-col items-center cursor-pointer group">
-              <div className="w-12 h-12 border border-white hover:border-gray-600 rounded-full flex items-center justify-center bg-transparent">
-                <ScissorsLineDashed className="text-white hover:text-gray-600" size={24} />
-              </div>
-              <h1 className="font-inter text-white mt-1 text-md">Edit</h1>
-            </div>
-
-            <div className="flex flex-col items-center cursor-pointer group">
-              <div className="w-12 h-12 border border-white hover:border-gray-600 rounded-full flex items-center justify-center bg-transparent">
-                <Radio className="text-white hover:text-gray-600" size={24} />
-              </div>
-              <h1 className="font-inter text-white mt-1 text-md">Live</h1>
-            </div>
-
-            <div className="flex flex-col items-center cursor-pointer group">
-              <div className="w-12 h-12 border border-white hover:border-gray-600 rounded-full flex items-center justify-center bg-transparent">
-                <Calendar className="text-white hover:text-gray-600" size={24} />
-              </div>
-              <h1 className="font-inter text-white mt-1 text-md">Plan</h1>
-            </div>
-
-            <div className="flex flex-col items-center cursor-pointer group">
-              <div className="w-12 h-12 border border-white hover:border-gray-600 rounded-full flex items-center justify-center bg-transparent">
-                <Upload className="text-white hover:text-gray-600" size={24} />
-              </div>
-              <h1 className="font-inter text-white mt-1 text-md">Import</h1>
-            </div>
+          <div className="flex justify-center gap-8 mt-16 px-8">
+            {actionItems.map((item, index) => {
+              const IconComponent = item.icon;
+              return (
+                <div
+                  key={item.id}
+                  className="group cursor-pointer animate-fade-in"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <Link href={item.href}>
+                    <div className="flex flex-col items-center">
+                      <div className={`
+                        w-16 h-16 rounded-2xl bg-gradient-to-br ${item.color} ${item.hoverColor}
+                        flex items-center justify-center shadow-lg ${item.shadow}
+                        transition-all duration-300 hover:scale-110 hover:shadow-xl
+                        group-hover:animate-pulse backdrop-blur-sm
+                      `}>
+                        <IconComponent className="text-white w-7 h-7" />
+                      </div>
+                      <h3 className="font-semibold text-slate-700 mt-3 text-lg group-hover:text-slate-900 transition-colors duration-300">
+                        {item.label}
+                      </h3>
+                    </div>
+                  </Link>
+                </div>
+              );
+            })}
           </div>
 
           {/* AI Tools Section - Desktop */}
-          <div className="mt-14 text-white">
-            <h1 className="font-inter text-center font-semibold text-2xl">AI tools</h1>
-            <VideoHover />
+          <div className="mt-20 px-8">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-3 backdrop-blur-sm bg-white/40 border border-white/60 rounded-2xl px-6 py-3 shadow-lg shadow-blue-100/50">
+                <Sparkles className="w-6 h-6 text-blue-600" />
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                  AI Tools
+                </h2>
+              </div>
+            </div>
+            <div className=" rounded-3xl p-8 shadow-lg shadow-blue-100/50">
+              <VideoHover />
+            </div>
           </div>
           <div className="h-10"></div>
         </div>
       </div>
 
       {/* Mobile Layout */}
-      <div className="lg:hidden">
-        {/* Welcome Button - Mobile */}
+      <div className="lg:hidden relative z-10">
+        {/* Welcome Section - Mobile */}
         <div className="flex justify-center pt-6 px-4">
-          <Button className="flex items-center gap-2 bg-black border border-white rounded-2xl text-sm font-inter py-2 px-4 hover:bg-gray-800 text-white shadow-xl">
-            <span className="font-inter">Welcome to <span className="text-blue-700">Podly</span></span>
-            <ArrowRight className="text-white w-4 h-4" />
-          </Button>
+          <div className="backdrop-blur-sm bg-white/60 border border-white/80 rounded-2xl p-4 shadow-lg shadow-blue-100/50 animate-fade-in">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-lg font-semibold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                Welcome to <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Podly</span>
+              </span>
+              <ArrowRight className="text-slate-600 w-4 h-4" />
+            </div>
+          </div>
         </div>
 
         {/* Action Items Grid - Mobile */}
         <div className="px-4 mt-8">
           <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
-            {/* Record */}
-            <div className="flex flex-col items-center cursor-pointer group">
-              <div className="w-16 h-16 border border-red-600 hover:border-red-800 rounded-full flex items-center justify-center bg-transparent">
-                <Link href={`/studio/${studioName}-studio`}>
-                  <Disc className="text-red-600 hover:text-red-800" size={28} />
-                </Link>
-              </div>
-              <h1 className="font-inter text-white mt-2 text-sm">Record</h1>
-            </div>
-
-            {/* Edit */}
-            <div className="flex flex-col items-center cursor-pointer group">
-              <div className="w-16 h-16 border border-white hover:border-gray-600 rounded-full flex items-center justify-center bg-transparent">
-                <ScissorsLineDashed className="text-white hover:text-gray-600" size={28} />
-              </div>
-              <h1 className="font-inter text-white mt-2 text-sm">Edit</h1>
-            </div>
-
-            {/* Live */}
-            <div className="flex flex-col items-center cursor-pointer group">
-              <div className="w-16 h-16 border border-white hover:border-gray-600 rounded-full flex items-center justify-center bg-transparent">
-                <Radio className="text-white hover:text-gray-600" size={28} />
-              </div>
-              <h1 className="font-inter text-white mt-2 text-sm">Live</h1>
-            </div>
-
-            {/* Plan */}
-            <div className="flex flex-col items-center cursor-pointer group">
-              <div className="w-16 h-16 border border-white hover:border-gray-600 rounded-full flex items-center justify-center bg-transparent">
-                <Calendar className="text-white hover:text-gray-600" size={28} />
-              </div>
-              <h1 className="font-inter text-white mt-2 text-sm">Plan</h1>
-            </div>
+            {actionItems.slice(0, 4).map((item, index) => {
+              const IconComponent = item.icon;
+              return (
+                <div
+                  key={item.id}
+                  className="group cursor-pointer animate-fade-in"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <Link href={item.href}>
+                    <div className="flex flex-col items-center">
+                      <div className={`
+                        w-16 h-16 rounded-2xl bg-gradient-to-br ${item.color} ${item.hoverColor}
+                        flex items-center justify-center shadow-lg ${item.shadow}
+                        transition-all duration-300 hover:scale-110 hover:shadow-xl
+                        group-hover:animate-pulse backdrop-blur-sm
+                      `}>
+                        <IconComponent className="text-white w-7 h-7" />
+                      </div>
+                      <h3 className="font-semibold text-slate-700 mt-2 text-sm group-hover:text-slate-900 transition-colors duration-300">
+                        {item.label}
+                      </h3>
+                    </div>
+                  </Link>
+                </div>
+              );
+            })}
           </div>
 
           {/* Import - Full Width on Mobile */}
-          <div className="flex justify-center mt-4">
-            <div className="flex flex-col items-center cursor-pointer group">
-              <div className="w-16 h-16 border border-white hover:border-gray-600 rounded-full flex items-center justify-center bg-transparent">
-                <Upload className="text-white hover:text-gray-600" size={28} />
-              </div>
-              <h1 className="font-inter text-white mt-2 text-sm">Import</h1>
+          <div className="flex justify-center mt-6 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <div className="group cursor-pointer">
+              {/* <Link href={actionItems[4]?.href}> */}
+                <div className="flex flex-col items-center">
+                  <div className={`
+                    w-16 h-16 rounded-2xl bg-gradient-to-br ${actionItems[4]?.color} ${actionItems[4]?.hoverColor}
+                    flex items-center justify-center shadow-lg ${actionItems[4]?.shadow}
+                    transition-all duration-300 hover:scale-110 hover:shadow-xl
+                    group-hover:animate-pulse backdrop-blur-sm
+                  `}>
+                    <Upload className="text-white w-7 h-7" />
+                  </div>
+                  <h3 className="font-semibold text-slate-700 mt-2 text-sm group-hover:text-slate-900 transition-colors duration-300">
+                    {actionItems[4]?.label}
+                  </h3>
+                </div>
+              
             </div>
           </div>
         </div>
 
         {/* AI Tools Section - Mobile */}
-        <div className="mt-12  text-white">
-          <h1 className="font-inter text-center font-semibold text-xl mb-6">AI tools</h1>
-          <VideoHover />
+        <div className="mt-12 px-4">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 backdrop-blur-sm bg-white/40 border border-white/60 rounded-2xl px-4 py-2 shadow-lg shadow-blue-100/50">
+              <Sparkles className="w-5 h-5 text-blue-600" />
+              <h2 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                AI Tools
+              </h2>
+            </div>
+          </div>
+          <div className="backdrop-blur-sm bg-white/30 border border-white/50 rounded-3xl p-6 shadow-lg shadow-blue-100/50">
+            <VideoHover />
+          </div>
         </div>
         <div className="h-8"></div>
       </div>
-    </div>
+   </div>
   );
 }

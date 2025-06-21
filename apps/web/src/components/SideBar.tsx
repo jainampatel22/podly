@@ -97,14 +97,14 @@ export default function Sidebar() {
     <>
       {/* Mobile Overlay */}
       {isMobile && isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" />
+        <div className="fixed inset-0 bg-white bg-opacity-50 z-40 md:hidden" />
       )}
 
       {/* Menu Button */}
       <button
         id="menu-button"
         className={`
-          bg-black text-white rounded-xl p-2 fixed top-4 left-4 cursor-pointer z-50
+          bg-white text-black mt-10  rounded-xl p-2 fixed top-4 left-4 cursor-pointer z-50
           transition-opacity duration-300 ease-in-out
           ${isOpen && isMobile ? "opacity-0 pointer-events-none" : "opacity-100"}
           md:${isOpen ? "opacity-0 pointer-events-none" : "opacity-100"}
@@ -119,7 +119,7 @@ export default function Sidebar() {
       <div
         id="sidebar"
         className={`
-          bg-black text-white fixed top-0 left-0 z-50 overflow-hidden
+          bg-slate-50 text-black fixed top-0 left-0 z-50 overflow-hidden
           transition-transform duration-300 ease-in-out
           ${isMobile 
             ? `h-full w-64 ${isOpen ? 'translate-x-0' : '-translate-x-full'}` 
@@ -132,7 +132,7 @@ export default function Sidebar() {
         {/* Close button for mobile */}
         {isMobile && isOpen && (
           <button
-            className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
+            className="absolute top-4 right-4 text-black hover:text-gray-300 z-10"
             onClick={() => setIsOpen(false)}
             aria-label="Close menu"
           >
@@ -160,8 +160,8 @@ export default function Sidebar() {
               key={idx}
               onClick={() => handleMenuClick(item.title, item.url)}
               className={`
-                flex items-center gap-3 cursor-pointer hover:text-gray-300 transition-colors
-                ${activeItem === item.title ? "text-blue-500" : "text-white"}
+                flex items-center gap-3 cursor-pointer hover:text-gray-200 transition-colors
+                ${activeItem === item.title ? "text-blue-500" : "text-black"}
                 py-2 pr-4 rounded-r-lg hover:bg-gray-800
               `}
             >
@@ -180,7 +180,7 @@ export default function Sidebar() {
               key={idx}
               onClick={() => handleMenuClick(item.title, item.url)}
               className={`
-                flex items-center gap-3 cursor-pointer hover:text-gray-300 transition-colors
+                flex items-center gap-3 cursor-pointer hover:slate-100 transition-colors
                 ${activeItem === item.title ? "text-blue-500" : "text-white"}
                 py-2 pr-4 rounded-r-lg hover:bg-gray-800
               `}

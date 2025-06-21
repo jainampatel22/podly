@@ -7,6 +7,7 @@ import { Play, Mic, Video, Users, Sparkles, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import Link from "next/link";
 export default function Index() {
   const [contentType, setContentType] = useState("");
   const router = useRouter();
@@ -257,7 +258,7 @@ const { data: sessionData, status } = useSession();
               `}
             >
               <span className="relative z-10 flex items-center space-x-2">
-                <span>Start Creating</span>
+               <Link href='/explore/home'> <span>Start Creating</span></Link>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
