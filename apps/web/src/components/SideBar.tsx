@@ -149,7 +149,7 @@ export default function Sidebar() {
               height={35}
               alt="Podly Logo"
             />
-            <h1 className="font-inter text-2xl md:text-3xl">Podly</h1>
+            <h1 className="font-semibold text-slate-700  text-3xl group-hover:text-slate-900 transition-colors duration-300">Podler</h1>
           </div>
         )}
 
@@ -160,41 +160,41 @@ export default function Sidebar() {
               key={idx}
               onClick={() => handleMenuClick(item.title, item.url)}
               className={`
-                flex items-center gap-3 cursor-pointer hover:text-gray-200 transition-colors
-                ${activeItem === item.title ? "text-blue-500" : "text-black"}
-                py-2 pr-4 rounded-r-lg hover:bg-gray-800
+                flex items-center gap-3 cursor-pointer hover:bg-slate-200 transition-colors
+                ${activeItem === item.title ? "text-blue-500 bg-slate-200" : "text-black"}
+                py-2 pr-4 rounded-r-lg 
               `}
             >
               <item.icon size={20} className="md:w-6 md:h-6" />
               {(isOpen || isMobile) && (
-                <span className="font-inter text-base md:text-lg">{item.title}</span>
+                <span className="font-semibold text-slate-700  text-lg group-hover:text-slate-900 transition-colors duration-300">{item.title}</span>
               )}
             </div>
           ))}
         </div>
 
         {/* Footer Icons */}
-        <div className="mt-20 md:mt-36 ml-5 space-y-4 md:space-y-5">
+        <div className="mt-20 md:mt-56 ml-5 space-y-4 md:space-y-5">
           {endIcons.map((item, idx) => (
             <div
               key={idx}
               onClick={() => handleMenuClick(item.title, item.url)}
               className={`
-                flex items-center gap-3 cursor-pointer hover:slate-100 transition-colors
-                ${activeItem === item.title ? "text-blue-500" : "text-white"}
-                py-2 pr-4 rounded-r-lg hover:bg-gray-800
+                flex items-center gap-3 cursor-pointer  
+                ${activeItem === item.title ? "text-blue-500 bg-slate-400" : "text-black"}
+                py-2 pr-4 rounded-r-lg hover:bg-slate-200
               `}
             >
               <item.icon size={20} className="md:w-6 md:h-6" />
               {(isOpen || isMobile) && (
-                <span className="font-inter text-base md:text-lg">{item.title}</span>
+                <span className="font-semibold text-slate-700  text-lg group-hover:text-slate-900 transition-colors duration-300">{item.title}</span>
               )}
             </div>
           ))}
 
           {/* User Avatar with Tooltip */}
           {session?.user?.image && (isOpen || isMobile) && (
-            <div className="mt-6">
+            <div className="mt-24 p-5 ">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>

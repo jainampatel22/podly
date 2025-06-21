@@ -6,12 +6,24 @@ import { SocketContext } from "../../app/Context/SocketContext"
 import UserFleedPlayer from "@/components/UserFleedPlayer"
 import Link from "next/link"
 import { AuthOptions } from "next-auth"
-import { Mic, MicOff, Video, PhoneOff, VideoOff } from 'lucide-react';
+import { Mic, MicOff, Video, PhoneOff, VideoOff, Monitor, Sparkles, Users } from 'lucide-react';
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { getServerSession } from "next-auth"
 import * as bodyPix from '@tensorflow-models/body-pix'
 import '@tensorflow/tfjs';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 type RoomId = {
     params: string
@@ -26,8 +38,8 @@ export default function RoomComponent({ params }: RoomId) {
     const [modelLoaded, setModelLoaded] = useState(false)
     const [modelError, setModelError] = useState<string | null>(null)
     const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null)
-    const [backgroundType, setBackgroundType] = useState<'blur' | 'image' | 'gradient'>('gradient')
-    
+    const [backgroundType, setBackgroundType] = useState<'blur' | 'image'>('blur')
+    const [backgroundEffectEnabled, setBackgroundEffectEnabled] = useState(false)
     const { myPeerId, socket, user, dispatch, stream, peers, setPeers, totalParticipants } = useContext(SocketContext)
     const MediaRecorderRef = useRef<MediaRecorder | null>(null)
     const [isMuted, setIsMuted] = useState(false)
@@ -54,6 +66,22 @@ export default function RoomComponent({ params }: RoomId) {
     };
 
     useEffect(() => {
+        if (!backgroundEffectEnabled) {
+        if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current);
+            animationFrameRef.current = null;
+        }
+        setProcessedStream(null);
+        setContextProcessedStream(stream); // <-- Always share the raw stream when effect is off
+        // Optionally clear canvas
+        const canvas = canvasRef.current;
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        return; // <-- Don't run the rest of the effect
+    }
+        
         let isMounted = true;
 
         const loadModelAndStart = async () => {
@@ -86,9 +114,22 @@ export default function RoomComponent({ params }: RoomId) {
                 setModelLoaded(true);
 
                 // Load background images
-                await loadBackgroundImages();
-                await setupVideo();
-
+               if (backgroundType === 'image') {
+    const img = await loadBackgroundImages();
+    if (!img || !img.complete) {
+        await new Promise<void>((resolve) => {
+            const checkLoaded = () => {
+                if (img && img.complete) {
+                    resolve();
+                } else {
+                    setTimeout(checkLoaded, 50);
+                }
+            };
+            checkLoaded();
+        });
+    }
+}
+        await setupVideo();
             } catch (error: any) {
                 console.error('Error loading model:', error);
                 if (isMounted) {
@@ -98,59 +139,37 @@ export default function RoomComponent({ params }: RoomId) {
         };
 
         const loadBackgroundImages = async () => {
-            const backgroundUrls = [
-                'https://imgs.search.brave.com/24FMZfs6O3ZVYzAaSbeyzaLvJKiLFS-24yHBTTeJNpQ/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvdmly/dHVhbC1tZWV0aW5n/LWJhY2tncm91bmQt/anJyYzlpZjR4YWkz/NnEzOS5qcGc',
+    const backgroundUrls = [
+        // ...your urls...
+         'https://imgs.search.brave.com/24FMZfs6O3ZVYzAaSbeyzaLvJKiLFS-24yHBTTeJNpQ/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvdmly/dHVhbC1tZWV0aW5n/LWJhY2tncm91bmQt/anJyYzlpZjR4YWkz/NnEzOS5qcGc',
                 '/bg1.webp',
                 '/x_banner.jpeg',
                 '/bg1.jpg',
                 '/bg2.jpg',
                 '/default-bg.png'
-            ];
-
-            console.log('Starting background image loading...');
-
-            for (const url of backgroundUrls) {
-                try {
-                    // First check if the image exists
-                    const exists = await debugImageExists(url);
-                    if (!exists) {
-                        console.warn(`Image ${url} does not exist, skipping...`);
-                        continue;
-                    }
-
-                    const img = new Image();
-                    img.crossOrigin = 'anonymous'; // Handle CORS if needed
-                    const loadPromise = new Promise<void>((resolve, reject) => {
-                        img.onload = () => {
-                            console.log(`✅ Background image loaded: ${url} (${img.naturalWidth}x${img.naturalHeight})`);
-                            resolve();
-                        };
-                        img.onerror = (error) => {
-                            console.warn(`❌ Failed to load image ${url}:`, error);
-                            reject(error);
-                        };
-                        setTimeout(() => reject(new Error('Image load timeout')), 5000);
-                    });
-
-                    img.src = url;
-                    await loadPromise;
-
-                    if (isMounted) {
-                        setBackgroundImage(img);
-                        console.log('✅ Background image set successfully');
-                        return;
-                    }
-                } catch (error) {
-                    console.warn(`Failed to load background image from ${url}:`, error);
-                    continue;
-                }
-            }
-            
-            console.warn('⚠️ All background images failed to load, using gradient fallback');
-            if (isMounted) {
-                setBackgroundImage(null);
-            }
-        };
+    ];
+    for (const url of backgroundUrls) {
+        try {
+            const exists = await debugImageExists(url);
+            if (!exists) continue;
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            const loadPromise = new Promise<void>((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = reject;
+                setTimeout(() => reject(new Error('Image load timeout')), 5000);
+            });
+            img.src = url;
+            await loadPromise;
+            setBackgroundImage(img);
+            return img; // <-- return the loaded image
+        } catch (error) {
+            continue;
+        }
+    }
+    setBackgroundImage(null);
+    return null;
+};
 
         const setupVideo = async () => {
             const video = videoRef.current;
@@ -375,11 +394,11 @@ export default function RoomComponent({ params }: RoomId) {
                             console.log('🖼️ Background image drawn successfully');
                         } catch (error) {
                             console.error('Error drawing background image:', error);
-                            drawGradientBackground(ctx, canvas);
+                          
                         }
                     } else {
                         console.warn('Background image not ready, using gradient');
-                        drawGradientBackground(ctx, canvas);
+                       
                     }
                     break;
                     
@@ -389,27 +408,14 @@ export default function RoomComponent({ params }: RoomId) {
                     ctx.filter = 'none';
                     break;
                     
-                case 'gradient':
+               
                 default:
-                    drawGradientBackground(ctx, canvas);
+                 
                     break;
             }
         };
 
-        const drawGradientBackground = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
-            const time = Date.now() * 0.001;
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            
-            const hue1 = (time * 20) % 360;
-            const hue2 = (time * 30 + 120) % 360;
-            
-            gradient.addColorStop(0, `hsl(${hue1}, 70%, 20%)`);
-            gradient.addColorStop(0.5, `hsl(${(hue1 + hue2) / 2}, 50%, 15%)`);
-            gradient.addColorStop(1, `hsl(${hue2}, 70%, 20%)`);
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        };
+        
 
         loadModelAndStart();
 
@@ -419,15 +425,9 @@ export default function RoomComponent({ params }: RoomId) {
                 cancelAnimationFrame(animationFrameRef.current);
             }
         };
-    }, [stream, backgroundType]);
+    }, [stream, backgroundType,backgroundEffectEnabled]);
 
-    const toggleBackground = () => {
-        const types: Array<'blur' | 'image' | 'gradient'> = ['gradient', 'blur', 'image'];
-        const currentIndex = types.indexOf(backgroundType);
-        const nextIndex = (currentIndex + 1) % types.length;
-        setBackgroundType(types[nextIndex] as 'blur' | 'image' | 'gradient');
-        console.log('🔄 Background type changed to:', types[nextIndex]);
-    };
+   
 
     // Debug logs
     useEffect(() => {
@@ -650,6 +650,9 @@ export default function RoomComponent({ params }: RoomId) {
     }, [recording, recordedChunks, roomName]);
 
     const renderVideoContent = () => {
+        if(!backgroundEffectEnabled && stream ){
+            return <UserFleedPlayer stream={stream} />;
+        }
         if (isVideoOff) {
             return (
                 <div className="text-white bg-gray-900 flex flex-col items-center justify-center w-full h-full">
@@ -728,75 +731,75 @@ export default function RoomComponent({ params }: RoomId) {
                 }} 
             />
 
-            <div className="hidden sm:block min-h-screen bg-black flex flex-col">
+           <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
+            {/* Background decorative elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-gradient-to-br from-blue-400/20 to-purple-400/20 blur-3xl"></div>
+                <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-gradient-to-br from-indigo-400/20 to-pink-400/20 blur-3xl"></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-gradient-to-br from-cyan-400/10 to-blue-400/10 blur-3xl"></div>
+            </div>
+
+            {/* Desktop Layout */}
+            <div className="hidden sm:block min-h-screen flex flex-col relative z-10">
                 {/* Header */}
-                <div className="flex-shrink-0 px-4 sm:px-6 lg:px-10 py-3 sm:py-5">
-                    <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                        <img
-                            src="https://shuttle.zip/images/homepage/icon.webp"
-                            width={35}
-                            height={35}
-                            alt=""
-                            className="flex-shrink-0"
-                        />
-                        <Link href="/">
-                            <h1 className="cursor-pointer text-xl sm:text-2xl font-semibold font-inter text-white">
-                                PODLY
+                <div className="flex-shrink-0 px-4 sm:px-6 lg:px-10 py-5">
+                    <div className="backdrop-blur-sm bg-white/60 border border-white/80 rounded-2xl p-4 shadow-lg shadow-blue-100/50">
+                        <div className="flex items-center gap-3 flex-wrap">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                                <Sparkles className="w-6 h-6 text-white" />
+                            </div>
+                            <a href="/">
+                                <h1 className="cursor-pointer text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                    PODLY
+                                </h1>
+                            </a>
+                            <div className="w-px h-8 bg-gradient-to-b from-slate-200 to-slate-400"></div>
+                            <h1 className="text-sm sm:text-md font-medium text-slate-700 truncate">
+                                {session?.user?.name}'s Studio
                             </h1>
-                        </Link>
-                        <div className="w-[2px] h-6 sm:h-8 bg-gray-400 hidden sm:block"></div>
-                        <h1 className="text-sm sm:text-md cursor-pointer font-inter text-white truncate">
-                            {session?.user?.name}'s STUDIO
-                        </h1>
-                        <input
-                            type="text"
-                            value={roomName}
-                            onChange={(e) => setRoomName(e.target.value)}
-                            className="text-lg sm:text-xl font-inter bg-transparent text-white border-none focus:bg-black/60 cursor-pointer outline-none min-w-0 flex-1 sm:flex-initial"
-                            placeholder="Room name"
-                        />
+                            <input
+                                type="text"
+                                value={roomName}
+                                onChange={(e) => setRoomName(e.target.value)}
+                                className="text-lg font-medium bg-transparent text-slate-700 border-none focus:bg-white/40 cursor-pointer outline-none min-w-0 flex-1 sm:flex-initial rounded-lg px-2 py-1 transition-all duration-300"
+                                placeholder="Room name"
+                            />
+                        </div>
                     </div>
                 </div>
 
                 {/* Video Grid */}
-                <div className="mt-10 flex-1 px-3 sm:px-4 lg:px-6">
-                    <div className={`grid gap-2 sm:gap-3 lg:gap-4 ${getGridClass()} h-full`}>
+                <div className="flex-1 px-4 sm:px-6 lg:px-10 pb-6">
+                    <div className={`grid gap-4 ${getGridClass()} h-full`}>
                         {/* Local user */}
-                        <div className={`rounded-lg lg:rounded-xl relative overflow-hidden bg-gray-900 flex items-center justify-center ${getVideoClass()}`}>
-                            {renderVideoContent()}
+                        <div className={`backdrop-blur-sm bg-white/20 border border-white/30 rounded-3xl relative overflow-hidden shadow-lg shadow-blue-100/50 flex items-center justify-center ${getVideoClass()}`}>
+                            <div className="w-full h-full rounded-3xl overflow-hidden">
+                                {renderVideoContent()}
+                            </div>
                             
-                            {totalParticipants === 1 ? (
-                                <div className="absolute bottom-2 sm:bottom-3 bg-black/70 px-2 sm:px-4 py-1 rounded-md sm:rounded-xl left-2 ml-80 text-white font-inter text-xs sm:text-sm">
-                                    {session?.user?.name || 'You'}
-                                </div>
-                            ) : (
-                                <div className="absolute bottom-2 sm:bottom-3 bg-black/70 px-2 sm:px-4 py-1 rounded-md sm:rounded-xl left-2 sm:left-5 text-white font-inter text-xs sm:text-sm">
-                                    {session?.user?.name || 'You'}
-                                </div>
-                            )}
+                            <div className="absolute bottom-4 left-4 backdrop-blur-sm bg-black/60 border border-white/20 px-4 py-2 rounded-xl text-white font-medium text-sm">
+                                {session?.user?.name || 'You'}
+                            </div>
+
+                            {/* Participant count indicator */}
+                            <div className="absolute top-4 right-4 backdrop-blur-sm bg-black/60 border border-white/20 px-3 py-2 rounded-xl flex items-center gap-2">
+                                <Users size={16} className="text-white" />
+                                <span className="text-white text-sm font-medium">{totalParticipants}</span>
+                            </div>
                         </div>
 
-                        {/* Other users */}
+                        {/* Other users placeholder */}
                         {Object.keys(peers).map((peerId) => (
                             <div
                                 key={peerId}
-                                className={`rounded-lg lg:rounded-xl relative overflow-hidden bg-gray-900 flex items-center justify-center ${getVideoClass()}`}
+                                className={`backdrop-blur-sm bg-white/20 border border-white/30 rounded-3xl relative overflow-hidden shadow-lg shadow-blue-100/50 flex items-center justify-center ${getVideoClass()}`}
                             >
-                                {peers[peerId]?.isVideoOff ? (
-                                    <div className="text-white flex bg-black/50 flex-col items-center justify-center w-full h-full">
-                                        <VideoOff size={48} className="mb-2 text-gray-400" />
-                                        <div className="absolute bottom-2 sm:bottom-3 px-2 sm:px-4 py-1 rounded-md sm:rounded-xl bg-black/80 left-2 sm:left-5 text-white font-inter text-xs sm:text-sm">
-                                            {peers[peerId]?.username || "Loading..."}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <UserFleedPlayer stream={peers[peerId]?.stream} />
-                                        <div className="absolute bottom-2 sm:bottom-3 bg-black/70 px-2 sm:px-4 py-1 rounded-md sm:rounded-xl left-2 sm:left-5 text-white font-inter text-xs sm:text-sm">
-                                            {peers[peerId]?.username || "Loading..."}
-                                        </div>
-                                    </>
-                                )}
+                                <div className="w-full h-full rounded-3xl overflow-hidden">
+                                    <UserFleedPlayer stream={peers[peerId]?.stream} />
+                                </div>
+                                <div className="absolute bottom-4 left-4 backdrop-blur-sm bg-black/60 border border-white/20 px-4 py-2 rounded-xl text-white font-medium text-sm">
+                                    {peers[peerId]?.username || "Loading..."}
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -804,77 +807,199 @@ export default function RoomComponent({ params }: RoomId) {
 
                 {/* Control Panel */}
                 <div className="flex-shrink-0 p-4 sm:p-6">
-                    <div className="flex items-center justify-center gap-3 sm:gap-4">
-                        <Button
-                            onClick={handleStartRecording}
-                            disabled={recording}
-                            className="rounded-lg sm:rounded-xl bg-red-500 hover:bg-red-700 text-white font-inter px-4 sm:px-8 py-2 sm:py-4 text-sm sm:text-base"
-                        >
-                            {recording ? "Recording..." : "Start Recording"}
-                        </Button>
-
-                        {recording && (
+                    <div className="backdrop-blur-sm bg-white/40 border border-white/60 rounded-3xl p-6 shadow-lg shadow-blue-100/50">
+                        <div className="flex items-center justify-center gap-4">
                             <Button
-                                onClick={stopRecording}
-                                className="rounded-lg sm:rounded-xl bg-yellow-500 hover:bg-yellow-600 text-white font-inter px-4 sm:px-8 py-2 sm:py-4 text-sm sm:text-base"
+                                onClick={handleStartRecording}
+                                disabled={recording}
+                                className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-semibold px-8 py-4 rounded-2xl shadow-lg shadow-red-500/25 hover:shadow-xl hover:shadow-red-500/30 transition-all duration-300 hover:scale-105 group relative overflow-hidden"
                             >
-                                Stop Recording
+                                <span className="relative z-10 flex items-center gap-2">
+                                    <Monitor className="w-5 h-5" />
+                                    {recording ? "Recording..." : " Record"}
+                                </span>
+                                <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             </Button>
-                        )}
 
-                        <Button
-                            onClick={toggleBackground}
-                            className="rounded-lg sm:rounded-xl bg-purple-500 hover:bg-purple-600 text-white font-inter px-4 sm:px-6 py-2 sm:py-4 text-sm sm:text-base"
-                        >
-                            BG: {backgroundType}
-                        </Button>
-
-                        <Button
-                            className="rounded-lg sm:rounded-xl bg-white/10 hover:bg-white/20 text-white font-inter flex items-center justify-center p-3 sm:p-4"
-                            onClick={toggleVideo}
-                        >
-                            {isVideoOff ? (
-                                <VideoOff size={24} className="text-red-600 sm:w-7 sm:h-7" />
-                            ) : (
-                                <Video size={24} className="sm:w-7 sm:h-7" />
+                            {recording && (
+                                <Button
+                                    onClick={stopRecording}
+                                    className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold px-8 py-4 rounded-2xl shadow-lg shadow-yellow-500/25 hover:shadow-xl hover:shadow-yellow-500/30 transition-all duration-300 hover:scale-105 group relative overflow-hidden"
+                                >
+                                    <span className="relative z-10">Stop </span>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-600 to-orange-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                </Button>
                             )}
-                        </Button>
+  
+<Dialog>
+  <DialogTrigger asChild>
+    <Button className="backdrop-blur-sm pt-2 bg-white/20 hover:bg-white/30 border border-white/30 text-slate-700 hover:text-slate-900 font-medium rounded-2xl p-4 transition-all duration-300 hover:scale-105 shadow-lg">
+      <Sparkles size={24} />
+    </Button>
+  </DialogTrigger>
+  <DialogContent className="sm:max-w-[425px]">
+    <DialogHeader>
+      <DialogTitle>Virtual Background Settings</DialogTitle>
+      <DialogDescription>
+        Choose your preferred background effect for the video call.
+      </DialogDescription>
+    </DialogHeader>
+    <div className="grid gap-4 py-4">
+      <div className="grid gap-3">
+        <Label htmlFor="background-type">Background Effect</Label>
+        <div className="grid grid-cols-2 gap-3">
+          {/* Image Background Option */}
+          <div 
+            className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+              backgroundType === 'image' 
+                ? 'border-blue-500 bg-blue-50' 
+                : 'border-gray-200 hover:border-gray-300'
+            }`}
+            onClick={() => setBackgroundType('image')}
+          >
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mb-2">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium">Custom Image</span>
+              <span className="text-xs text-gray-500 mt-1">Use background image</span>
+            </div>
+          </div>
 
-                        <Button className="rounded-lg sm:rounded-xl bg-white/10 hover:bg-white/20 text-white font-inter flex items-center justify-center p-3 sm:p-4">
-                            <PhoneOff className="text-red-500" size={24} />
-                        </Button>
+          {/* Blur Background Option */}
+          <div 
+            className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+              backgroundType === 'blur' 
+                ? 'border-blue-500 bg-blue-50' 
+                : 'border-gray-200 hover:border-gray-300'
+            }`}
+            onClick={() => setBackgroundType('blur')}
+          >
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-2">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium">Blur Effect</span>
+              <span className="text-xs text-gray-500 mt-1">Blur your background</span>
+            </div>
+          </div>
+       
+        </div>
+      </div>
+      
+      {/* Preview Section */}
+      <div className="grid gap-3">
+        <Label>Preview</Label>
+        <div className="h-20 bg-gray-100 rounded-lg flex items-center justify-center border">
+          {backgroundType === 'image' ? (
+            <div className="flex items-center gap-2 text-gray-600">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="text-sm">Custom Background Image</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-gray-600">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-200 to-cyan-200 rounded blur-sm"></div>
+              <span className="text-sm">Blurred Background</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+    <DialogFooter>
+      <DialogClose asChild>
+        <Button variant="outline">Cancel</Button>
+      </DialogClose>
+      <DialogClose asChild>
+        <Button 
+          type="button"
+        onClick={()=>setBackgroundEffectEnabled(true)}
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+        >
+          Apply Background
+        </Button>
+      </DialogClose>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
+
+                            <Button
+                                className="backdrop-blur-sm  pt-2 bg-white/20 hover:bg-white/30 border border-white/30 text-slate-700 hover:text-slate-900 font-medium rounded-2xl p-4 transition-all   duration-300 hover:scale-105 shadow-lg"
+                                onClick={toggleVideo}
+                            >
+                                {isVideoOff ? (
+                                    <VideoOff size={24} className="text-red-500" />
+                                ) : (
+                                    <Video size={24} />
+                                )}
+                            </Button>
+
+                            <Button
+                                className="backdrop-blur-sm pt-2 bg-white/20 hover:bg-white/30 border border-white/30 text-slate-700 hover:text-slate-900 font-medium rounded-2xl p-4 transition-all  duration-300 hover:scale-105 shadow-lg"
+                                onClick={toggleMute}
+                            >
+                                {isMuted ? (
+                                    <MicOff size={24} className="text-red-500" />
+                                ) : (
+                                    <Mic size={24} />
+                                )}
+                            </Button>
+
+                            <Button className="backdrop-blur-sm bg-white/20 hover:bg-red-500/20 border border-white/30 hover:border-red-500/30 text-slate-700 hover:text-red-500 font-medium  rounded-2xl p-4 transition-all duration-300 hover:scale-105 shadow-lg">
+                                <PhoneOff size={24} />
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div className="md:hidden bg-black/90 backdrop-blur-md min-h-screen flex flex-col">
-                <div className="bg-black text-white header gap-3 flex items-center px-4 sm:px-6 md:px-10 py-5">
-                    <img
-                        src="https://shuttle.zip/images/homepage/icon.webp"
-                        width={25}
-                        height={25}
-                        alt="logo"
-                    />
-                    <Link href="/">
-                        <h1 className="cursor-pointer text-lg sm:text-2xl font-semibold font-inter text-white">
-                            PODLY
+            {/* Mobile Layout */}
+            <div className="sm:hidden backdrop-blur-md min-h-screen flex flex-col relative z-10">
+                <div className="backdrop-blur-sm bg-white/60 border-b border-white/80 p-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                            <Sparkles className="w-5 h-5 text-white" />
+                        </div>
+                        <a href="/">
+                            <h1 className="cursor-pointer text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                PODLY
+                            </h1>
+                        </a>
+                        <div className="w-px h-6 bg-gradient-to-b from-slate-200 to-slate-400"></div>
+                        <h1 className="text-sm font-medium text-slate-700 truncate">
+                            {session?.user?.name}'s Studio
                         </h1>
-                    </Link>
-                    <div className="w-[2px] h-6 sm:h-8 bg-gray-400"></div>
-                    <h1 className="text-sm sm:text-md cursor-pointer font-inter text-white truncate">
-                        {session?.user?.name}'s STUDIO
-                    </h1>
+                    </div>
                 </div>
 
                 <div className="flex-1 flex flex-col justify-center items-center text-center px-6">
-                    <h1 className="text-white font-inter text-2xl sm:text-3xl font-semibold mb-4">
-                        You can't access this via mobile device
-                    </h1>
-                    <h1 className="text-white mt-4 font-inter text-xl sm:text-2xl">
-                        Please switch to a desktop device to continue
-                    </h1>
+                    <div className="backdrop-blur-sm bg-white/40 border border-white/60 rounded-3xl p-8 max-w-sm shadow-lg shadow-blue-100/50">
+                        <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/25">
+                            <Monitor className="w-8 h-8 text-white" />
+                        </div>
+                        <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-4">
+                            Desktop Required
+                        </h1>
+                        <p className="text-slate-600 text-lg leading-relaxed mb-6">
+                            Studio access requires a desktop device for the best experience.
+                        </p>
+                        <Button 
+                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-blue-500/25 transition-all duration-300 hover:scale-105"
+                            onClick={() => window.location.href = '/'}
+                        >
+                            Back to Home
+                        </Button>
+                    </div>
                 </div>
             </div>
+        </div>
         </>
     )
 }
