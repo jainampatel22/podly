@@ -1,0 +1,9 @@
+.js
+.env
+node_modules
+dist
+coverage
+.vscode
+.DS_Store
+# Ignore logs
+logs
