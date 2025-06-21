@@ -52,7 +52,16 @@ export default function RoomComponent({ params }: RoomId) {
     const animationFrameRef = useRef<number | null>(null)
     const netRef = useRef<bodyPix.BodyPix | null>(null)
     const lastProcessTimeRef = useRef<number>(0)
-
+ const backgroundImages = [
+  '/bg1.webp',
+  '/bg2.jpg',
+  '/bg3.jpg',
+  '/bg4.jpg',
+  '/bg5.jpg',
+  'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
+  'https://images.unsplash.com/photo-1465101046530-73398c7f28ca'
+];
+const [selectedImage, setSelectedImage] = useState(backgroundImages[0]);
     // Debug function to check if image exists
     const debugImageExists = async (imagePath: string) => {
         try {
@@ -138,39 +147,28 @@ export default function RoomComponent({ params }: RoomId) {
             }
         };
 
-        const loadBackgroundImages = async () => {
-    const backgroundUrls = [
-        // ...your urls...
-         'https://imgs.search.brave.com/24FMZfs6O3ZVYzAaSbeyzaLvJKiLFS-24yHBTTeJNpQ/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvdmly/dHVhbC1tZWV0aW5n/LWJhY2tncm91bmQt/anJyYzlpZjR4YWkz/NnEzOS5qcGc',
-                '/bg1.webp',
-                '/x_banner.jpeg',
-                '/bg1.jpg',
-                '/bg2.jpg',
-                '/default-bg.png'
-    ];
-    for (const url of backgroundUrls) {
-        try {
-            const exists = await debugImageExists(url);
-            if (!exists) continue;
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            const loadPromise = new Promise<void>((resolve, reject) => {
-                img.onload = () => resolve();
-                img.onerror = reject;
-                setTimeout(() => reject(new Error('Image load timeout')), 5000);
-            });
-            img.src = url;
-            await loadPromise;
-            setBackgroundImage(img);
-            return img; // <-- return the loaded image
-        } catch (error) {
-            continue;
-        }
-    }
+       
+
+const loadBackgroundImages = async () => {
+  try {
+    const exists = await debugImageExists(selectedImage ?? '');
+    if (!exists) throw new Error('Image does not exist');
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    const loadPromise = new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = reject;
+      setTimeout(() => reject(new Error('Image load timeout')), 5000);
+    });
+    img.src = selectedImage ?? '';
+    await loadPromise;
+    setBackgroundImage(img);
+    return img;
+  } catch (error) {
     setBackgroundImage(null);
     return null;
+  }
 };
-
         const setupVideo = async () => {
             const video = videoRef.current;
             const canvas = canvasRef.current;
@@ -425,7 +423,7 @@ export default function RoomComponent({ params }: RoomId) {
                 cancelAnimationFrame(animationFrameRef.current);
             }
         };
-    }, [stream, backgroundType,backgroundEffectEnabled]);
+    }, [stream, backgroundType,backgroundEffectEnabled,selectedImage]);
 
    
 
@@ -857,15 +855,37 @@ export default function RoomComponent({ params }: RoomId) {
             }`}
             onClick={() => setBackgroundType('image')}
           >
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mb-2">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium">Custom Image</span>
-              <span className="text-xs text-gray-500 mt-1">Use background image</span>
-            </div>
+           <div className="flex gap-4 overflow-x-auto pb-2">
+  {backgroundImages.map((img, idx) => (
+    <div
+      key={img}
+      className={`relative cursor-pointer rounded-xl border-4 transition-all duration-200 shadow-lg ${
+        selectedImage === img
+          ? 'border-blue-600 ring-4 ring-blue-200 scale-105'
+          : 'border-transparent hover:border-blue-300'
+      }`}
+      style={{ minWidth: 150, minHeight: 90 }}
+      onClick={() => {
+        setSelectedImage(img);
+        setBackgroundType('image');
+      }}
+    >
+      <img
+        src={img}
+        alt={`Background ${idx + 1}`}
+        className="w-52 h-28 object-cover rounded-lg"
+        style={{ display: 'block' }}
+      />
+      {selectedImage === img && (
+        <div className="absolute top-2 right-2 bg-blue-600 rounded-full p-1 shadow">
+          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+      )}
+    </div>
+  ))}
+</div>
           </div>
 
           {/* Blur Background Option */}
