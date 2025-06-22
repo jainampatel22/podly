@@ -30,6 +30,7 @@ type RoomId = {
 }
 
 export default function RoomComponent({ params }: RoomId) {
+    const [hasUploaded, setHasUploaded] = useState(false);
     const [roomName, setRoomName] = useState("untitled")
     const videoRef = useRef<HTMLVideoElement | null>(null)
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -53,77 +54,75 @@ export default function RoomComponent({ params }: RoomId) {
     const netRef = useRef<bodyPix.BodyPix | null>(null)
     const lastProcessTimeRef = useRef<number>(0)
  const backgroundImages = [
-  '/bg1.webp',
-  '/bg2.jpg',
-  '/bg3.jpg',
-  '/bg4.jpg',
-  '/bg5.jpg',
+
   'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
   'https://images.unsplash.com/photo-1465101046530-73398c7f28ca'
 ];
-const [selectedImage, setSelectedImage] = useState(backgroundImages[0]);
-    // Debug function to check if image exists
-    const debugImageExists = async (imagePath: string) => {
-        try {
-            const response = await fetch(imagePath);
-            console.log(`Image ${imagePath} - Status: ${response.status}, Size: ${response.headers.get('content-length')} bytes`);
-            return response.ok;
-        } catch (error) {
-            console.error(`Failed to fetch image ${imagePath}:`, error);
-            return false;
-        }
-    };
+const [selectedImage, setSelectedImage] = useState<string | null>(null);
+const [customImage, setCustomImage] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (!backgroundEffectEnabled) {
-        if (animationFrameRef.current) {
-            cancelAnimationFrame(animationFrameRef.current);
-            animationFrameRef.current = null;
-        }
-        setProcessedStream(null);
-        setContextProcessedStream(stream); // <-- Always share the raw stream when effect is off
-        // Optionally clear canvas
-        const canvas = canvasRef.current;
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-        return; // <-- Don't run the rest of the effect
+// Debug function to check if image exists
+const debugImageExists = async (imagePath: string) => {
+    try {
+        const response = await fetch(imagePath);
+        console.log(`Image ${imagePath} - Status: ${response.status}, Size: ${response.headers.get('content-length')} bytes`);
+        return response.ok;
+    } catch (error) {
+        console.error(`Failed to fetch image ${imagePath}:`, error);
+        return false;
     }
-        
-        let isMounted = true;
+};
 
-        const loadModelAndStart = async () => {
+useEffect(() => {
+    if (!backgroundEffectEnabled) {
+    if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+    }
+    setProcessedStream(null);
+    setContextProcessedStream(stream); // <-- Always share the raw stream when effect is off
+    // Optionally clear canvas
+    const canvas = canvasRef.current;
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    return; // <-- Don't run the rest of the effect
+}
+
+    let isMounted = true;
+
+    const loadModelAndStart = async () => {
+        try {
+            console.log('Loading BodyPix model...');
+            
+            // Try ResNet50 first for better quality
+            let net;
             try {
-                console.log('Loading BodyPix model...');
-                
-                // Try ResNet50 first for better quality
-                let net;
-                try {
-                    net = await bodyPix.load({
-                        architecture: 'ResNet50',
-                        outputStride: 16,
-                        quantBytes: 2
-                    });
-                    console.log('ResNet50 model loaded successfully');
-                } catch (resnetError) {
-                    console.warn('ResNet50 failed, falling back to MobileNet:', resnetError);
-                    net = await bodyPix.load({
-                        architecture: 'MobileNetV1',
-                        outputStride: 16,
-                        multiplier: 0.75,
-                        quantBytes: 2
-                    });
-                    console.log('MobileNetV1 model loaded successfully');
-                }
-                
-                if (!isMounted) return;
-                
-                netRef.current = net;
-                setModelLoaded(true);
+                net = await bodyPix.load({
+                    architecture: 'ResNet50',
+                    outputStride: 16,
+                    quantBytes: 2
+                });
+                console.log('ResNet50 model loaded successfully');
+            } catch (resnetError) {
+                console.warn('ResNet50 failed, falling back to MobileNet:', resnetError);
+                net = await bodyPix.load({
+                    architecture: 'MobileNetV1',
+                    outputStride: 16,
+                    multiplier: 0.75,
+                    quantBytes: 2
+                });
+                console.log('MobileNetV1 model loaded successfully');
+            }
+            
+            if (!isMounted) return;
+            
+            netRef.current = net;
+            setModelLoaded(true);
 
-                // Load background images
-               if (backgroundType === 'image') {
+            // Load background images
+           if (backgroundType === 'image') {
     const img = await loadBackgroundImages();
     if (!img || !img.complete) {
         await new Promise<void>((resolve) => {
@@ -139,19 +138,20 @@ const [selectedImage, setSelectedImage] = useState(backgroundImages[0]);
     }
 }
         await setupVideo();
-            } catch (error: any) {
-                console.error('Error loading model:', error);
-                if (isMounted) {
-                    setModelError(error.message || 'Failed to load AI model');
-                }
+        } catch (error: any) {
+            console.error('Error loading model:', error);
+            if (isMounted) {
+                setModelError(error.message || 'Failed to load AI model');
             }
-        };
+        }
+    };
 
-       
+   
 
 const loadBackgroundImages = async () => {
+  if (!selectedImage) return null;
   try {
-    const exists = await debugImageExists(selectedImage ?? '');
+    const exists = await debugImageExists(selectedImage);
     if (!exists) throw new Error('Image does not exist');
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -160,7 +160,7 @@ const loadBackgroundImages = async () => {
       img.onerror = reject;
       setTimeout(() => reject(new Error('Image load timeout')), 5000);
     });
-    img.src = selectedImage ?? '';
+    img.src = selectedImage;
     await loadPromise;
     setBackgroundImage(img);
     return img;
@@ -169,263 +169,263 @@ const loadBackgroundImages = async () => {
     return null;
   }
 };
-        const setupVideo = async () => {
-            const video = videoRef.current;
-            const canvas = canvasRef.current;
+    const setupVideo = async () => {
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
 
-            if (!video || !canvas) {
-                console.error('Video or canvas ref not available');
-                return;
-            }
+        if (!video || !canvas) {
+            console.error('Video or canvas ref not available');
+            return;
+        }
 
-            const ctx = canvas.getContext('2d');
-            if (!ctx) {
-                console.error('Could not get canvas context');
-                return;
-            }
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            console.error('Could not get canvas context');
+            return;
+        }
 
-            try {
-                let mediaStream = stream;
-                
-                if (!mediaStream) {
-                    console.log('Getting user media...');
-                    mediaStream = await navigator.mediaDevices.getUserMedia({
-                        video: {
-                            width: { ideal: 1280, min: 640 },
-                            height: { ideal: 720, min: 480 },
-                            frameRate: { ideal: 30, min: 15 }
-                        },
-                        audio: true
-                    });
-                }
-
-                if (!video.srcObject) {
-                    video.srcObject = mediaStream;
-                    
-                    await new Promise((resolve, reject) => {
-                        video.onloadedmetadata = resolve;
-                        video.onerror = reject;
-                        setTimeout(reject, 10000);
-                    });
-
-                    await video.play();
-                }
-
-                // Wait for video dimensions
-                let attempts = 0;
-                while ((video.videoWidth === 0 || video.videoHeight === 0) && attempts < 50) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    attempts++;
-                }
-
-                if (video.videoWidth === 0 || video.videoHeight === 0) {
-                    throw new Error('Video has no dimensions after timeout');
-                }
-
-                console.log('📹 Video setup complete:', video.videoWidth, 'x', video.videoHeight);
-                
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-
-                // Start processing
-                startProcessing(video, canvas, ctx);
-
-            } catch (error: any) {
-                console.error('Error setting up video:', error);
-                if (isMounted) {
-                    setModelError('Failed to access camera: ' + error.message);
-                }
-            }
-        };
-
-        const startProcessing = (video: HTMLVideoElement, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) => {
-            console.log('🎬 Starting video processing...');
+        try {
+            let mediaStream = stream;
             
-            // Create processed stream
-            const processed = canvas.captureStream(25); // Reduced FPS for better performance
-            setProcessedStream(processed);
-            setContextProcessedStream(processed);
-            const processInterval = 1000 / 25; // 25 FPS
+            if (!mediaStream) {
+                console.log('Getting user media...');
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 1280, min: 640 },
+                        height: { ideal: 720, min: 480 },
+                        frameRate: { ideal: 30, min: 15 }
+                    },
+                    audio: true
+                });
+            }
 
-            const renderFrame = async (currentTime: number) => {
-                if (!isMounted || !video || video.readyState < 2) {
-                    if (isMounted) {
-                        animationFrameRef.current = requestAnimationFrame(renderFrame);
-                    }
-                    return;
-                }
+            if (!video.srcObject) {
+                video.srcObject = mediaStream;
+                
+                await new Promise((resolve, reject) => {
+                    video.onloadedmetadata = resolve;
+                    video.onerror = reject;
+                    setTimeout(reject, 10000);
+                });
 
-                // Throttle processing
-                if (currentTime - lastProcessTimeRef.current < processInterval) {
-                    if (isMounted) {
-                        animationFrameRef.current = requestAnimationFrame(renderFrame);
-                    }
-                    return;
-                }
+                await video.play();
+            }
 
-                lastProcessTimeRef.current = currentTime;
+            // Wait for video dimensions
+            let attempts = 0;
+            while ((video.videoWidth === 0 || video.videoHeight === 0) && attempts < 50) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
 
-                try {
-                    const net = netRef.current;
-                    
-                    if (net) {
-                        // Get segmentation
-                        const segmentation = await net.segmentPerson(video, {
-                            flipHorizontal: false,
-                            internalResolution: 'medium',
-                            segmentationThreshold: 0.7,
-                            maxDetections: 1,
-                            scoreThreshold: 0.4,
-                            nmsRadius: 20
-                        });
+            if (video.videoWidth === 0 || video.videoHeight === 0) {
+                throw new Error('Video has no dimensions after timeout');
+            }
 
-                        // Check person detection quality
-                        const personPixels = segmentation.data.filter(pixel => pixel === 1).length;
-                        const totalPixels = segmentation.data.length;
-                        const personRatio = personPixels / totalPixels;
+            console.log('📹 Video setup complete:', video.videoWidth, 'x', video.videoHeight);
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
 
-                        if (personRatio < 0.01) {
-                            // Very low person detection, just show original video
-                            console.warn('⚠️ Low person detection, showing original video');
-                            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                        } else {
-                            // Apply background with person mask
-                            applyBackgroundWithMask(ctx, canvas, segmentation, video);
-                        }
-                    } else {
-                        // No background processing, just draw video
-                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    }
+            // Start processing
+            startProcessing(video, canvas, ctx);
 
-                } catch (error) {
-                    console.warn('Error in renderFrame:', error);
-                    // Fallback: draw video directly
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                }
+        } catch (error: any) {
+            console.error('Error setting up video:', error);
+            if (isMounted) {
+                setModelError('Failed to access camera: ' + error.message);
+            }
+        }
+    };
 
+    const startProcessing = (video: HTMLVideoElement, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) => {
+        console.log('🎬 Starting video processing...');
+        
+        // Create processed stream
+        const processed = canvas.captureStream(25); // Reduced FPS for better performance
+        setProcessedStream(processed);
+        setContextProcessedStream(processed);
+        const processInterval = 1000 / 25; // 25 FPS
+
+        const renderFrame = async (currentTime: number) => {
+            if (!isMounted || !video || video.readyState < 2) {
                 if (isMounted) {
                     animationFrameRef.current = requestAnimationFrame(renderFrame);
                 }
-            };
+                return;
+            }
 
-            renderFrame(0);
-        };
-
-        const applyBackgroundWithMask = (
-            ctx: CanvasRenderingContext2D,
-            canvas: HTMLCanvasElement,
-            segmentation: any,
-            video: HTMLVideoElement
-        ) => {
-            // Step 1: Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Step 2: Draw background
-            drawBackground(ctx, canvas, video);
-            
-            // Step 3: Apply person mask using pixel manipulation
-            const backgroundImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const backgroundData = backgroundImageData.data;
-            
-            // Get video frame data
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = canvas.width;
-            tempCanvas.height = canvas.height;
-            const tempCtx = tempCanvas.getContext('2d')!;
-            tempCtx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const videoImageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
-            const videoData = videoImageData.data;
-            
-            // Create final image data
-            const finalImageData = ctx.createImageData(canvas.width, canvas.height);
-            const finalData = finalImageData.data;
-            
-            // Apply mask: person pixels from video, background pixels from background
-            for (let i = 0; i < segmentation.data.length; i++) {
-                const pixelIndex = i * 4;
-                
-                if (segmentation.data[i] === 1) {
-                    // Person pixel - use video
-                    finalData[pixelIndex] = videoData[pixelIndex] ?? 0;         // R
-                    finalData[pixelIndex + 1] = videoData[pixelIndex + 1] ?? 0; // G
-                    finalData[pixelIndex + 2] = videoData[pixelIndex + 2] ?? 0; // B
-                    finalData[pixelIndex + 3] = 255;                       // A
-                } else {
-                    // Background pixel - use background
-                    finalData[pixelIndex] = backgroundData[pixelIndex]??0;         // R
-                    finalData[pixelIndex + 1] = backgroundData[pixelIndex + 1] ?? 0 ; // G
-                    finalData[pixelIndex + 2] = backgroundData[pixelIndex + 2] ?? 0; // B
-                    finalData[pixelIndex + 3] = backgroundData[pixelIndex + 3] ?? 0; // A
+            // Throttle processing
+            if (currentTime - lastProcessTimeRef.current < processInterval) {
+                if (isMounted) {
+                    animationFrameRef.current = requestAnimationFrame(renderFrame);
                 }
+                return;
             }
-            
-            // Draw the final composited image
-            ctx.putImageData(finalImageData, 0, 0);
-        };
 
-        const drawBackground = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, video: HTMLVideoElement) => {
-            switch (backgroundType) {
-                case 'image':
-                    if (backgroundImage && backgroundImage.complete && backgroundImage.naturalWidth > 0) {
-                        try {
-                            // Calculate aspect ratio and scaling
-                            const imgAspect = backgroundImage.naturalWidth / backgroundImage.naturalHeight;
-                            const canvasAspect = canvas.width / canvas.height;
-                            
-                            let drawWidth, drawHeight, drawX, drawY;
-                            
-                            if (imgAspect > canvasAspect) {
-                                // Image is wider - fit to height
-                                drawHeight = canvas.height;
-                                drawWidth = drawHeight * imgAspect;
-                                drawX = (canvas.width - drawWidth) / 2;
-                                drawY = 0;
-                            } else {
-                                // Image is taller - fit to width
-                                drawWidth = canvas.width;
-                                drawHeight = drawWidth / imgAspect;
-                                drawX = 0;
-                                drawY = (canvas.height - drawHeight) / 2;
-                            }
-                            
-                            ctx.drawImage(backgroundImage, drawX, drawY, drawWidth, drawHeight);
-                            console.log('🖼️ Background image drawn successfully');
-                        } catch (error) {
-                            console.error('Error drawing background image:', error);
-                          
-                        }
+            lastProcessTimeRef.current = currentTime;
+
+            try {
+                const net = netRef.current;
+                
+                if (net) {
+                    // Get segmentation
+                    const segmentation = await net.segmentPerson(video, {
+                        flipHorizontal: false,
+                        internalResolution: 'medium',
+                        segmentationThreshold: 0.7,
+                        maxDetections: 1,
+                        scoreThreshold: 0.4,
+                        nmsRadius: 20
+                    });
+
+                    // Check person detection quality
+                    const personPixels = segmentation.data.filter(pixel => pixel === 1).length;
+                    const totalPixels = segmentation.data.length;
+                    const personRatio = personPixels / totalPixels;
+
+                    if (personRatio < 0.01) {
+                        // Very low person detection, just show original video
+                        console.warn('⚠️ Low person detection, showing original video');
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                     } else {
-                        console.warn('Background image not ready, using gradient');
-                       
+                        // Apply background with person mask
+                        applyBackgroundWithMask(ctx, canvas, segmentation, video);
                     }
-                    break;
-                    
-                case 'blur':
-                    ctx.filter = 'blur(20px) brightness(0.8)';
+                } else {
+                    // No background processing, just draw video
                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    ctx.filter = 'none';
-                    break;
-                    
-               
-                default:
-                 
-                    break;
+                }
+
+            } catch (error) {
+                console.warn('Error in renderFrame:', error);
+                // Fallback: draw video directly
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            }
+
+            if (isMounted) {
+                animationFrameRef.current = requestAnimationFrame(renderFrame);
             }
         };
 
+        renderFrame(0);
+    };
+
+    const applyBackgroundWithMask = (
+        ctx: CanvasRenderingContext2D,
+        canvas: HTMLCanvasElement,
+        segmentation: any,
+        video: HTMLVideoElement
+    ) => {
+        // Step 1: Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-
-        loadModelAndStart();
-
-        return () => {
-            isMounted = false;
-            if (animationFrameRef.current) {
-                cancelAnimationFrame(animationFrameRef.current);
+        // Step 2: Draw background
+        drawBackground(ctx, canvas, video);
+        
+        // Step 3: Apply person mask using pixel manipulation
+        const backgroundImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const backgroundData = backgroundImageData.data;
+        
+        // Get video frame data
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const tempCtx = tempCanvas.getContext('2d')!;
+        tempCtx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const videoImageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
+        const videoData = videoImageData.data;
+        
+        // Create final image data
+        const finalImageData = ctx.createImageData(canvas.width, canvas.height);
+        const finalData = finalImageData.data;
+        
+        // Apply mask: person pixels from video, background pixels from background
+        for (let i = 0; i < segmentation.data.length; i++) {
+            const pixelIndex = i * 4;
+            
+            if (segmentation.data[i] === 1) {
+                // Person pixel - use video
+                finalData[pixelIndex] = videoData[pixelIndex] ?? 0;         // R
+                finalData[pixelIndex + 1] = videoData[pixelIndex + 1] ?? 0; // G
+                finalData[pixelIndex + 2] = videoData[pixelIndex + 2] ?? 0; // B
+                finalData[pixelIndex + 3] = 255;                       // A
+            } else {
+                // Background pixel - use background
+                finalData[pixelIndex] = backgroundData[pixelIndex]??0;         // R
+                finalData[pixelIndex + 1] = backgroundData[pixelIndex + 1] ?? 0 ; // G
+                finalData[pixelIndex + 2] = backgroundData[pixelIndex + 2] ?? 0; // B
+                finalData[pixelIndex + 3] = backgroundData[pixelIndex + 3] ?? 0; // A
             }
-        };
-    }, [stream, backgroundType,backgroundEffectEnabled,selectedImage]);
+        }
+        
+        // Draw the final composited image
+        ctx.putImageData(finalImageData, 0, 0);
+    };
 
-   
+    const drawBackground = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, video: HTMLVideoElement) => {
+        switch (backgroundType) {
+            case 'image':
+                if (backgroundImage && backgroundImage.complete && backgroundImage.naturalWidth > 0) {
+                    try {
+                        // Calculate aspect ratio and scaling
+                        const imgAspect = backgroundImage.naturalWidth / backgroundImage.naturalHeight;
+                        const canvasAspect = canvas.width / canvas.height;
+                        
+                        let drawWidth, drawHeight, drawX, drawY;
+                        
+                        if (imgAspect > canvasAspect) {
+                            // Image is wider - fit to height
+                            drawHeight = canvas.height;
+                            drawWidth = drawHeight * imgAspect;
+                            drawX = (canvas.width - drawWidth) / 2;
+                            drawY = 0;
+                        } else {
+                            // Image is taller - fit to width
+                            drawWidth = canvas.width;
+                            drawHeight = drawWidth / imgAspect;
+                            drawX = 0;
+                            drawY = (canvas.height - drawHeight) / 2;
+                        }
+                        
+                        ctx.drawImage(backgroundImage, drawX, drawY, drawWidth, drawHeight);
+                        console.log('🖼️ Background image drawn successfully');
+                    } catch (error) {
+                        console.error('Error drawing background image:', error);
+                      
+                    }
+                } else {
+                    console.warn('Background image not ready, using gradient');
+                   
+                }
+                break;
+                
+            case 'blur':
+                ctx.filter = 'blur(20px) brightness(0.8)';
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                ctx.filter = 'none';
+                break;
+                
+           
+            default:
+             
+                break;
+        }
+    };
+
+    
+
+    loadModelAndStart();
+
+    return () => {
+        isMounted = false;
+        if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current);
+        }
+    };
+}, [stream, backgroundType,backgroundEffectEnabled,selectedImage]);
+
+ 
 
     // Debug logs
     useEffect(() => {
@@ -620,32 +620,50 @@ const loadBackgroundImages = async () => {
         }
     };
 
-    useEffect(() => {
-        if (!recording && recordedChunks.length > 0) {
-            console.log('Processing recorded chunks:', recordedChunks.length);
-
-            const blob = new Blob(recordedChunks, { type: 'video/webm' });
-
-            if (blob.size === 0) {
-                alert("No video recorded, please try again");
-                return;
+  useEffect(() => {
+    const uploadToS3 = async (blob: Blob) => {
+        try {
+            if (!session) throw new Error('User not authenticated');
+            const res = await fetch('/api/upload-url', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    fileType: blob.type,
+                    userName: session.user?.name,
+                    roomId: params
+                })
+            });
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(`Failed to get signed URL: ${errorText}`);
             }
-
-            console.log('Blob size:', blob.size);
-
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${roomName || 'recording'}.webm`;
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            URL.revokeObjectURL(url);
-            setRecordedChunks([]);
+            const { signedUrl, fileName } = await res.json();
+            if (!signedUrl || !fileName) {
+                throw new Error("Missing signedUrl or fileName from server");
+            }
+            const uploadRes = await fetch(signedUrl, {
+                method: "PUT",
+                headers: { "Content-Type": blob.type },
+                body: blob,
+            });
+            if (!uploadRes.ok) throw new Error("Upload failed");
+            console.log('uploaded to s3 successfully', fileName);
+            setRecordedChunks([]); // Clear after successful upload
+        } catch (error) {
+            console.error("❌ Upload failed:", error);
+            alert("Upload failed");
         }
-    }, [recording, recordedChunks, roomName]);
+    };
+
+    if (!recording && recordedChunks.length > 0 && !hasUploaded) {
+        setHasUploaded(true); // Set BEFORE upload to prevent double call
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        uploadToS3(blob);
+    }
+    if (recording && hasUploaded) {
+        setHasUploaded(false); // Reset when starting a new recording
+    }
+}, [recording, recordedChunks, roomName, hasUploaded, session, params]);
 
     const renderVideoContent = () => {
         if(!backgroundEffectEnabled && stream ){
@@ -701,6 +719,19 @@ const loadBackgroundImages = async () => {
             </div>
         );
     };
+const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const url = event.target?.result as string;
+    setCustomImage(url);
+    setSelectedImage(url);
+    setBackgroundType('image');
+    setBackgroundEffectEnabled(true);
+  };
+  reader.readAsDataURL(file);
+};
 
     return (
         <>
@@ -855,36 +886,34 @@ const loadBackgroundImages = async () => {
             }`}
             onClick={() => setBackgroundType('image')}
           >
-           <div className="flex gap-4 overflow-x-auto pb-2">
-  {backgroundImages.map((img, idx) => (
-    <div
-      key={img}
-      className={`relative cursor-pointer rounded-xl border-4 transition-all duration-200 shadow-lg ${
-        selectedImage === img
-          ? 'border-blue-600 ring-4 ring-blue-200 scale-105'
-          : 'border-transparent hover:border-blue-300'
-      }`}
-      style={{ minWidth: 150, minHeight: 90 }}
-      onClick={() => {
-        setSelectedImage(img);
-        setBackgroundType('image');
-      }}
-    >
+     <div className="flex flex-col items-center text-center">
+  <label
+    className={`w-32 h-24 flex flex-col items-center justify-center cursor-pointer rounded-xl border-2 transition-all duration-200
+      ${backgroundType === 'image' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}
+    `}
+    title="Upload custom background"
+  >
+    {customImage ? (
       <img
-        src={img}
-        alt={`Background ${idx + 1}`}
-        className="w-52 h-28 object-cover rounded-lg"
-        style={{ display: 'block' }}
+        src={customImage}
+        alt="Custom background"
+        className="w-32 h-24 object-cover rounded-lg"
       />
-      {selectedImage === img && (
-        <div className="absolute top-2 right-2 bg-blue-600 rounded-full p-1 shadow">
-          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-      )}
-    </div>
-  ))}
+    ) : (
+      <>
+        <span className="text-3xl text-blue-400 mb-1">+</span>
+        <span className="text-xs text-gray-500">Upload</span>
+      </>
+    )}
+    <input
+      type="file"
+      accept="image/*"
+      className="hidden"
+      onChange={handleImageUpload}
+    />
+  </label>
+  <span className="text-sm font-medium mt-2">Custom Image</span>
+  <span className="text-xs text-gray-500 mt-1">Upload your own background</span>
 </div>
           </div>
 
