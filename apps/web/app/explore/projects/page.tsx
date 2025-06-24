@@ -7,7 +7,7 @@ export default function ExploreProjects() {
        
         <>
         <Projects/>
-        <h1>hi</h1>
+     
         </>
     )
 

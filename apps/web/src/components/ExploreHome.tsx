@@ -36,15 +36,15 @@ export default function ExploreHome() {
       hoverColor: 'hover:from-purple-600 hover:to-indigo-700',
       shadow: 'shadow-purple-500/25 hover:shadow-purple-500/40'
     },
-    {
-      id: 'live',
-      icon: Radio,
-      label: 'Live',
-      href: '#',
-      color: 'from-green-500 to-emerald-600',
-      hoverColor: 'hover:from-green-600 hover:to-emerald-700',
-      shadow: 'shadow-green-500/25 hover:shadow-green-500/40'
-    },
+    // {
+    //   id: 'live',
+    //   icon: Radio,
+    //   label: 'Live',
+    //   href: '#',
+    //   color: 'from-green-500 to-emerald-600',
+    //   hoverColor: 'hover:from-green-600 hover:to-emerald-700',
+    //   shadow: 'shadow-green-500/25 hover:shadow-green-500/40'
+    // },
     {
       id: 'plan',
       icon: Calendar,

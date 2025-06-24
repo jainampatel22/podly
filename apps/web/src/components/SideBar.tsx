@@ -30,7 +30,7 @@ export default function Sidebar() {
 
   const items = [
     { title: "Home", url: "/home", icon: Home },
-    { title: "Projects", url: "/explore/myprojects", icon: Inbox },
+    { title: "Projects", url: "/explore/projects", icon: Inbox },
     { title: "Calendar", url: "/explore/calendar", icon: Calendar },
     { title: "Scheduled", url: "/explore/schedule", icon: Search },
   ];
