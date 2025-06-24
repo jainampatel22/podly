@@ -2,10 +2,33 @@
 import { redirect } from 'next/navigation'
 import Sidebar from '@/components/SideBar'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, Upload, Calendar, Radio, ScissorsLineDashed, Disc, Sparkles } from 'lucide-react'
+import { ArrowRight, Upload, Radio, ScissorsLineDashed, Disc, Sparkles } from 'lucide-react'
 import VideoHover from '@/components/VideoHover'
 import Link from 'next/link'
+
 import { useSession } from 'next-auth/react'
+import { TimePicker } from '@mui/x-date-pickers/TimePicker'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import dayjs from 'dayjs'
+import TextField from '@mui/material/TextField'
+
+import { useState } from 'react'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Calendar } from "@/components/ui/calendar"
+
+import React from 'react'
 
 export default function ExploreHome() {
   const { data: session } = useSession()
@@ -16,7 +39,12 @@ export default function ExploreHome() {
   
   const fetchstudioName = session?.user?.name
   const studioName = (fetchstudioName ?? "user-studio").trim().toLowerCase().replace(/\s+/g, '-');
-
+const [open, setOpen] = useState(false);
+const [time, setTime] = React.useState(dayjs())
+const [ name,setName]= useState<string | undefined>('Jainam Patel')
+const [email, setEmail] = useState<string | undefined>('')
+const [subject, setSubject] = useState<string | undefined>('Late Night Talks')
+const [date, setDate] = React.useState<Date | undefined>(new Date())
   const actionItems = [
     {
       id: 'record',
@@ -36,23 +64,16 @@ export default function ExploreHome() {
       hoverColor: 'hover:from-purple-600 hover:to-indigo-700',
       shadow: 'shadow-purple-500/25 hover:shadow-purple-500/40'
     },
-    // {
-    //   id: 'live',
-    //   icon: Radio,
-    //   label: 'Live',
-    //   href: '#',
-    //   color: 'from-green-500 to-emerald-600',
-    //   hoverColor: 'hover:from-green-600 hover:to-emerald-700',
-    //   shadow: 'shadow-green-500/25 hover:shadow-green-500/40'
-    // },
+   
     {
       id: 'plan',
-      icon: Calendar,
+      icon: Upload,
       label: 'Plan',
       href: '#',
       color: 'from-blue-500 to-cyan-600',
       hoverColor: 'hover:from-blue-600 hover:to-cyan-700',
       shadow: 'shadow-blue-500/25 hover:shadow-blue-500/40'
+
     },
     {
       id: 'import',
@@ -66,6 +87,7 @@ export default function ExploreHome() {
   ];
 
   return (
+  <LocalizationProvider dateAdapter={AdapterDayjs}>
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -97,6 +119,112 @@ export default function ExploreHome() {
           <div className="flex justify-center gap-8 mt-16 px-8">
             {actionItems.map((item, index) => {
               const IconComponent = item.icon;
+              if(item.id === 'plan'){
+                return (
+                   <Dialog key={item.id} open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <div
+              className="group cursor-pointer animate-fade-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
+              onClick={() => setOpen(true)}
+            >
+              <div className="flex flex-col items-center">
+                <div className={`
+                  w-16 h-16 rounded-2xl bg-gradient-to-br ${item.color} ${item.hoverColor}
+                  flex items-center justify-center shadow-lg ${item.shadow}
+                  transition-all duration-300 hover:scale-110 hover:shadow-xl
+                  group-hover:animate-pulse backdrop-blur-sm
+                `}>
+                  <IconComponent className="text-white w-7 h-7" />
+                </div>
+                <h3 className="font-semibold text-slate-700 mt-3 text-lg group-hover:text-slate-900 transition-colors duration-300">
+                  {item.label}
+                </h3>
+              </div>
+            </div>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+            <DialogTitle>Schedule Call </DialogTitle>
+            <DialogDescription>
+             schedule a your call with your friends, family or special one&apos;s
+              
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="grid gap-3">
+              <Label htmlFor="name-1">Name</Label>
+              <Input id="name-1" name="name" value={name} onChange={(e)=>setName(e.target.value)}  />
+            </div>
+            <div className="grid gap-3">
+              <Label htmlFor="username-1">Email</Label>
+              <Input id="username-1" name="email" value={email} onChange={(e)=>setEmail(e.target.value)} type="email"  />
+            </div>
+            <div className="grid gap-3">
+              <Label htmlFor="username-1">Subject</Label>
+              <Input id="username-1" name="subject" value={subject} onChange={(e)=>setSubject(e.target.value)}  />
+            </div>
+               <div className="grid gap-3">
+                  <Label htmlFor="username-1">Pick a date</Label>
+         <Calendar
+      mode="single"
+      selected={date}
+      onSelect={setDate}
+      className="rounded-md border sm:ml-24 shadow-sm"
+      captionLayout="dropdown"
+    />
+ 
+       
+       
+               </div>
+               <div className="grid gap-3">
+                  <Label htmlFor="username-1">Pick a Time</Label>
+        
+    <TimePicker
+  value={time}
+  onChange={(newValue) => {
+    if (newValue !== null) setTime(newValue)
+  }}
+  slotProps={{
+    textField: {
+      fullWidth: true,
+      sx: {
+        // Input border when focused
+        '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+          borderColor: 'black',
+        },
+        // Label color when focused
+        '& .MuiInputLabel-root.Mui-focused': {
+          color: 'black',
+        },
+        // Remove blue focus ring
+        '& .MuiOutlinedInput-root': {
+          '&.Mui-focused': {
+            boxShadow: '0 0 0 1px black', // optional subtle glow
+            outline: 'none',
+          },
+        },
+      },
+    },
+  }}
+/>
+{/* {name}
+{email}
+{subject}
+{date?.toLocaleDateString()}
+{time.format('hh:mm A')} */}
+        </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button type="submit">Save changes</Button>
+          </DialogFooter>
+          </DialogContent>
+        </Dialog>
+                )
+              }
               return (
                 <div
                   key={item.id}
@@ -228,5 +356,6 @@ export default function ExploreHome() {
         <div className="h-8"></div>
       </div>
    </div>
+  </LocalizationProvider>
   );
 }
