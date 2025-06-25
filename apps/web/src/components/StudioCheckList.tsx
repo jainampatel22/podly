@@ -1,8 +1,7 @@
 'use client'
-import { AuthOptions } from "next-auth"
-import { getServerSession } from "next-auth"
+
 import { useSession } from "next-auth/react"
-import Link from "next/link"
+
 import { redirect } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"

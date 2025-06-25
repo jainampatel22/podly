@@ -1,7 +1,11 @@
 import InviteUrl from "@/components/InviteUrl";
-
-export default function Invite({params}:{params:{name:string}}){
-  const name = params.name
+type Props = {
+  params: Promise<{
+    name: string;
+  }>;
+};
+export default async function Invite({params}:Props){
+ const { name} = await params
   return (
     <InviteUrl name={name}/>
   )

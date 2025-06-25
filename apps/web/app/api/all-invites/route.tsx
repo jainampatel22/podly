@@ -1,7 +1,7 @@
 // app/api/all-invites/route.ts
 
 import { PrismaClient } from '@prisma/client'
-import { authOptions } from '../auth/[...nextauth]/route'
+import { authOptions } from '../../lib/authOptions'
 import { getServerSession } from 'next-auth'
 
 const prisma = new PrismaClient()

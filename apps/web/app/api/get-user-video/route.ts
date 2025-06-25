@@ -2,8 +2,7 @@ import { S3Client, ListObjectsV2Command, GetObjectCommand } from "@aws-sdk/clien
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { authOptions } from "../auth/[...nextauth]/route";
-
+import { authOptions } from "../../lib/authOptions";
 const s3 = new S3Client({
   region: process.env.AWS_REGION!,
   credentials: {
