@@ -11,9 +11,10 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
-import TextField from '@mui/material/TextField'
+
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+
 import {
   Dialog,
   DialogClose,
@@ -29,7 +30,7 @@ import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
 
 import React from 'react'
-import { set } from 'date-fns'
+
 
 export default function ExploreHome() {
   const { data: session } = useSession()
@@ -40,7 +41,6 @@ export default function ExploreHome() {
   const [error, setError] = useState<string | null>(null);
 const [loading,setLoading] =useState<boolean>(false)
 
-  
   const fetchstudioName = session?.user?.name
   const studioName = (fetchstudioName ?? "user-studio").trim().toLowerCase().replace(/\s+/g, '-');
 const [open, setOpen] = useState(false);
@@ -89,6 +89,7 @@ const [date, setDate] = React.useState<Date | undefined>(new Date())
       shadow: 'shadow-orange-500/25 hover:shadow-orange-500/40'
     }
   ];
+
 const sendMail = async()=>{
     if (!name || !email || !subject || !date || !time) {
     setError("All fields are required.");
@@ -103,6 +104,20 @@ try {
     subject,
     date: date?.toLocaleDateString(),
     time: time.format('hh:mm A')
+  })
+  
+  
+  const validDate = date?.toISOString()
+  const user1 = session?.user?.name
+  
+  await axios.post('http://localhost:3000/api/invite',{
+    senderName:user1,
+    reciverName:name,
+    date:validDate,
+    email,
+    subject,
+    time:time.format('hh:mm A'),
+
   })
 setOpen(false)
 
