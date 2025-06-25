@@ -5,14 +5,14 @@ import { Button } from '@/components/ui/button'
 import { ArrowRight, Upload, Radio, ScissorsLineDashed, Disc, Sparkles } from 'lucide-react'
 import VideoHover from '@/components/VideoHover'
 import Link from 'next/link'
-
+import axios from 'axios'
 import { useSession } from 'next-auth/react'
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
 import TextField from '@mui/material/TextField'
-
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
   Dialog,
@@ -29,13 +29,17 @@ import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
 
 import React from 'react'
+import { set } from 'date-fns'
 
 export default function ExploreHome() {
   const { data: session } = useSession()
-  
+  const router= useRouter()
   if (!session) {
     redirect('/sign-in')
   }
+  const [error, setError] = useState<string | null>(null);
+const [loading,setLoading] =useState<boolean>(false)
+
   
   const fetchstudioName = session?.user?.name
   const studioName = (fetchstudioName ?? "user-studio").trim().toLowerCase().replace(/\s+/g, '-');
@@ -85,7 +89,31 @@ const [date, setDate] = React.useState<Date | undefined>(new Date())
       shadow: 'shadow-orange-500/25 hover:shadow-orange-500/40'
     }
   ];
+const sendMail = async()=>{
+    if (!name || !email || !subject || !date || !time) {
+    setError("All fields are required.");
+    return;
+  }
+  setError(null);
+  setLoading(true)
+try {
+  const response = await axios.post('http://localhost:5050/send-mail',{
+    name,
+    email,
+    subject,
+    date: date?.toLocaleDateString(),
+    time: time.format('hh:mm A')
+  })
+setOpen(false)
 
+} catch (error) {
+  alert('Failed to send email.');
+      console.error(error);
+}
+finally{
+  setLoading(false)
+}
+}
   return (
   <LocalizationProvider dateAdapter={AdapterDayjs}>
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
@@ -151,6 +179,9 @@ const [date, setDate] = React.useState<Date | undefined>(new Date())
               
             </DialogDescription>
           </DialogHeader>
+           {error && (
+    <div className="text-red-600 font-medium mb-2">{error}</div>
+  )}
           <div className="grid gap-4">
             <div className="grid gap-3">
               <Label htmlFor="name-1">Name</Label>
@@ -219,8 +250,10 @@ const [date, setDate] = React.useState<Date | undefined>(new Date())
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button type="submit">Save changes</Button>
-          </DialogFooter>
+<Button type="submit" onClick={sendMail} disabled={loading}>
+  {loading ? "Sending..." : "Save changes"}
+</Button>
+   </DialogFooter>
           </DialogContent>
         </Dialog>
                 )
