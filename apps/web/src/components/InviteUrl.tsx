@@ -25,7 +25,17 @@ interface Invite {
 export default function InviteUrl(props:{name:string}){
     const {name} =props
     const [invites,setInvites] = useState<Invite[]>([])
-   
+   const handleUpdate =async(status:'approved'|"rejected",id:string)=>{
+try {
+    const res = await axios.put('/api/invite-status',{
+        id,status
+    })
+    console.log(res.data.message)
+     setInvites(prevInvites => prevInvites.filter(invite => invite.id !== id))
+} catch (error) {
+    console.error('Failed to update invite:', error)
+}
+   }
     useEffect(()=>{
 const invite = async()=>{
     const res = await axios.get(`http://localhost:3000/api/invite-for-meet?name=${name}`)
@@ -115,8 +125,8 @@ invite()
                   </div>
                 </CardContent>
                 <CardFooter className="p-4 gap-3 border-t border-border [.border-t]:pt-4">
-          <Button className="w-full text-md bg-green-500 hover:bg-white hover:text-green-500">Accept</Button>
-                   <Button className="w-full text-md bg-white border text-red-600 hover:text-white hover:bg-red-600">Reject</Button> 
+          <Button className="w-full text-md bg-green-500 hover:bg-white hover:text-green-500" onClick={()=>handleUpdate('approved',invite.id)}>Accept</Button>
+                   <Button className="w-full text-md bg-white border text-red-600 hover:text-white hover:bg-red-600" onClick={()=>handleUpdate('rejected',invite.id)}>Reject</Button> 
         </CardFooter>
               </MagicCard>
             </Card>

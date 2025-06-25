@@ -254,11 +254,7 @@ finally{
     },
   }}
 />
-{/* {name}
-{email}
-{subject}
-{date?.toLocaleDateString()}
-{time.format('hh:mm A')} */}
+
         </div>
           </div>
           <DialogFooter>

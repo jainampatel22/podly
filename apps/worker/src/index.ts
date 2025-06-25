@@ -18,24 +18,30 @@ app.post('/send-mail',async(req,res)=>{
         }
     })
     const mailOptions = {
-        from:process.env.EMAIL,
-        to:email,
-        subject:subject,
-    html: `
+  from: process.env.EMAIL,
+  to: email,
+  subject: subject,
+  html: `
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 8px;">
     <h2 style="color: #2c3e50;">Hello ${name},</h2>
 
     <p style="font-size: 16px; color: #333;">
-      You have been <strong>selected for a scheduled call</strong> on <strong>${date}</strong> at <strong>${time}</strong>.
+      You have been <strong>invited for a scheduled call</strong> on <strong>${date}</strong> at <strong>${time}</strong>.
     </p>
 
     <p style="font-size: 16px; color: #333;">
-      This call has been initiated through <strong>Podler</strong>, your trusted platform for connecting professionals effectively and meaningfully.
+      This meeting has been set up via <strong>Podler</strong>, your platform for building meaningful professional connections.
     </p>
 
     <p style="font-size: 16px; color: #333;">
-      Please ensure you're available at the scheduled time. If you need to reschedule or have any questions, feel free to reach out in advance.
+      Please review the invitation and let us know your availability.
     </p>
+
+    <div style="margin: 30px 0; text-align: center;">
+      <a href="http://localhost:3000/invite/${encodeURIComponent(name)}" style="background-color: #2c3e50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-size: 16px;">
+        View & Respond to Invitation
+      </a>
+    </div>
 
     <p style="font-size: 16px; color: #333;">
       Thank you for choosing Podler.
@@ -51,10 +57,9 @@ app.post('/send-mail',async(req,res)=>{
       <a href="https://podler.com" style="color: #888;">www.podler.com</a>
     </footer>
   </div>
-`
+  `
+}
 
-        
-    }
     await transporter.sendMail(mailOptions)
     res.status(200).send({ success: true, message: 'Email sent successfully!' });
 
