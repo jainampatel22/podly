@@ -32,7 +32,7 @@ export default  function Meetings(){
     useEffect(() => {
       const fetchInvites = async () => {
         try {
-          const res = await axios.get('http://localhost:3000/api/all-invites')
+          const res = await axios.get('api/all-invites')
           setInvites(res.data)
           console.log(res.data)
         } catch (error) {

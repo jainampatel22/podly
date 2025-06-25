@@ -98,7 +98,7 @@ const sendMail = async()=>{
   setError(null);
   setLoading(true)
 try {
-  const response = await axios.post('http://localhost:5050/send-mail',{
+  const response = await axios.post('https://podly-email-system.onrender.com/send-mail',{
     name,
     email,
     subject,
@@ -110,7 +110,7 @@ try {
   const validDate = date?.toISOString()
   const user1 = session?.user?.name
   
-  await axios.post('http://localhost:3000/api/invite',{
+  await axios.post('api/invite',{
     senderName:user1,
     reciverName:name,
     date:validDate,

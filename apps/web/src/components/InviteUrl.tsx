@@ -38,7 +38,7 @@ try {
    }
     useEffect(()=>{
 const invite = async()=>{
-    const res = await axios.get(`http://localhost:3000/api/invite-for-meet?name=${name}`)
+    const res = await axios.get(`api/invite-for-meet?name=${name}`)
     console.log(res.data)
     setInvites(res.data)
 }
