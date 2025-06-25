@@ -38,7 +38,7 @@ app.post('/send-mail',async(req,res)=>{
     </p>
 
     <div style="margin: 30px 0; text-align: center;">
-      <a href="http://localhost:3000/invite/${encodeURIComponent(name)}" style="background-color: #2c3e50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-size: 16px;">
+      <a href="https://podly-web.vercel.app/invite/${encodeURIComponent(name)}" style="background-color: #2c3e50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-size: 16px;">
         View & Respond to Invitation
       </a>
     </div>
