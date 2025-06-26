@@ -10,6 +10,10 @@
       }
     ]
   },
+   "moduleResolution": "Bundler",
+       "target": "ESNext",
+    "module": "ESNext",
+    "skipLibCheck": true,
   "include": [
     "**/*.ts",
     "**/*.tsx",
