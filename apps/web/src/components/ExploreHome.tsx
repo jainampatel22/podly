@@ -110,7 +110,7 @@ try {
   const validDate = date?.toISOString()
   const user1 = session?.user?.name
   
-  await axios.post('api/invite',{
+  await axios.post('https://podly-web.vercel.app/api/invite',{
     senderName:user1,
     reciverName:name,
     date:validDate,
