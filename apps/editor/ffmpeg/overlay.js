@@ -1,7 +1,7 @@
 const ffmpeg = require('fluent-ffmpeg')
 const { PassThrough } = require('stream')
 
-function addTextOverLay(inputPath, startTime, duration, text) {
+function addTextOverLay(inputBuffer, startTime, duration, text) {
   return new Promise((resolve, reject) => {
     const safeText = text.replace(/'/g, "\\'");
     const drawText = `drawtext=text='${safeText}':fontcolor=white:fontsize=24:x=(w-text_w)/2:y=50:enable='between(t,${startTime},${parseFloat(startTime) + parseFloat(duration)})'`;
@@ -10,7 +10,7 @@ function addTextOverLay(inputPath, startTime, duration, text) {
 
     console.log('drawText:', drawText);
 
-    ffmpeg(inputPath)
+    ffmpeg(inputBuffer)
       .videoFilter(drawText)
       .format('mp4').outputOptions('-movflags', 'frag_keyframe+empty_moov').
       on('stderr', line => console.log('ffmpeg stderr:', line)) 

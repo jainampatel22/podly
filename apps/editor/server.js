@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { TrimVideo } = require('./ffmpeg/ffmpeg');
 const { addTextOverLay } = require('./ffmpeg/overlay');
-
+const {processVideo} = require('./ffmpeg/processVideo')
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -20,15 +20,12 @@ if (!fs.existsSync(outputDir)) {
 }
 
 app.post('/upload', upload.single('video'), async (req, res) => {
-  const { start, duration } = req.body;
+const operations = JSON.parse(req.body.operations);
+
   const inputPath = path.resolve(req.file.path);
-  const outputName = `output-${Date.now()}.mp4`;
-  
+ 
   try {
-    console.log('Input path:', inputPath);
-console.log('File exists:', fs.existsSync(inputPath));
-console.log('File size:', fs.statSync(inputPath).size);
-   const videoBuffer =  await TrimVideo(inputPath, start, duration);
+    const videoBuffer = await processVideo(inputPath,operations)
     res.setHeader('Content-Type', 'video/mp4');
     res.setHeader('Content-Disposition', 'inline; filename="output.mp4"');
     res.send(videoBuffer);
@@ -36,6 +33,10 @@ console.log('File size:', fs.statSync(inputPath).size);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Video processing failed.' });
+  }
+  finally {
+    // Cleanup the uploaded file
+    fs.unlinkSync(inputPath);
   }
 });
 

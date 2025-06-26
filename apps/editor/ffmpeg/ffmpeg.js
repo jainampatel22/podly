@@ -1,12 +1,12 @@
 const ffmpeg = require('fluent-ffmpeg');
 const { PassThrough } = require('stream');
 
-function TrimVideo(inputPath, start, duration) {
+function TrimVideo(inputBuffer, start, duration) {
   return new Promise((resolve, reject) => {
     const stream = new PassThrough();
     const chunks = [];
 
-    ffmpeg(inputPath)
+    ffmpeg(inputBuffer)
       .setStartTime(start)
       .setDuration(duration)
       .format('mp4')

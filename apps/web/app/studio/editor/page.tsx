@@ -10,32 +10,41 @@ export default function UploadForm() {
   const [outputUrl, setOutputUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleUpload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!videoFile) return alert('Select a video.');
+const handleUpload = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!videoFile) return alert('Select a video.');
 
-    const formData = new FormData();
-    formData.append('video', videoFile);
-    formData.append('start', start);
-    formData.append('duration', duration);
-    formData.append('text', text);
+  // Build operations array
+  const operations = [];
 
-    setLoading(true);
-    try {
-      const res = await axios.post('http://localhost:4000/upload', formData, {
-        responseType: 'blob', // Important!
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      const videoBlob = new Blob([res.data], { type: 'video/mp4' });
-      const videoUrl = URL.createObjectURL(videoBlob);
-      setOutputUrl(videoUrl);
-    } catch (error) {
-      console.error(error);
-      alert('Upload failed');
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (start && duration) {
+    operations.push({ type: 'trim', start: Number(start), duration: Number(duration) });
+  }
+
+  if (text) {
+    operations.push({ type: 'drawtext', text, x: 10, y: 10 }); // you can add x/y UI later
+  }
+
+  const formData = new FormData();
+  formData.append('video', videoFile);
+  formData.append('operations', JSON.stringify(operations));
+
+  setLoading(true);
+  try {
+    const res = await axios.post('http://localhost:4000/upload', formData, {
+      responseType: 'blob',
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    const videoBlob = new Blob([res.data], { type: 'video/mp4' });
+    const videoUrl = URL.createObjectURL(videoBlob);
+    setOutputUrl(videoUrl);
+  } catch (error) {
+    console.error(error);
+    alert('Upload failed');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div style={{ padding: 20 }}>
