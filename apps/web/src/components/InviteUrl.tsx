@@ -27,7 +27,7 @@ export default function InviteUrl(props:{name:string}){
     const [invites,setInvites] = useState<Invite[]>([])
    const handleUpdate =async(status:'approved'|"rejected",id:string)=>{
 try {
-    const res = await axios.put('https://podly-web.vercel.app//api/invite-status',{
+    const res = await axios.put('/api/invite-status',{
         id,status
     })
     console.log(res.data.message)
@@ -38,7 +38,7 @@ try {
    }
     useEffect(()=>{
 const invite = async()=>{
-    const res = await axios.get(`https://podly-web.vercel.app/api/invite-for-meet?name=${name}`)
+    const res = await axios.get(`/api/invite-for-meet?name=${name}`)
     console.log(res.data)
     setInvites(res.data)
 }
