@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
+
 import { toast } from "sonner"
 import {  Dropzone,
   DropZoneArea,
@@ -23,6 +24,7 @@ const[showTextInput,setShowTextInput]=useState(false)
   const [grayScale,setGrayScale]=useState(false)
   const {data:session}=useSession()
     const [width,setWidth]=useState('')
+    const [caption,setCaption]=useState(false)
     const  [height,setHeight]=useState('')
     const videoRef = useRef<HTMLVideoElement>(null)
     const [boxWidth, setBoxWidth] = useState(1920); 
@@ -99,6 +101,9 @@ const handleUpload = async (e: React.FormEvent) => {
   }
   if(speed){
     operations.push({type:'speed',rate:speed})
+  }
+  if(caption){
+    operations.push({type:"captions"})
   }
   const formData = new FormData();
   formData.append('video', videoFile);
@@ -244,7 +249,7 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
  {videoFile ? (
 <div className="w-72 bg-black/60 backdrop-blur-md border-r border-white/20 p-6 shadow-lg">
   <div className="pt-10 pl-2">
-    <div className='mb-14 text-2xl  '>🎬 Video Effects</div>
+    <div className='mb-14 text-2xl  '>🎬  Video Effects</div>
     <div className="flex items-center gap-3 text-white">
       <h1 className="text-2xl font-semibold cursor-pointer" onClick={() => {
         setShowScaleInput(false)
@@ -386,7 +391,27 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
       )
     }
 
+    <div className="flex items-center gap-3 text-white">
+    <h1
+  className="text-xl font-semibold cursor-pointer"
+  onClick={() => {
+    const newValue = !caption; // compute next state
+    setCaption(newValue);
 
+    toast(newValue ? '🌑 Grayscale has been added!' : '❌ Grayscale has been removed!', {
+      duration: 2000,
+    });
+  }}
+>
+  Live Captions
+</h1>
+<h1 className="mt-1">🌑</h1>
+
+    </div>
+    
+    <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
+     Transform your visuals into stylish black and white.
+    </p>
   </div>
 </div>
 
