@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
+import { toast } from "sonner"
 import {  Dropzone,
   DropZoneArea,
 DropzoneTrigger,
@@ -19,18 +20,22 @@ const[showTextInput,setShowTextInput]=useState(false)
   const [text, setText] = useState('');
   const [outputUrl, setOutputUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [grayScale,setGrayScale]=useState(false)
   const {data:session}=useSession()
     const [width,setWidth]=useState('')
     const  [height,setHeight]=useState('')
     const videoRef = useRef<HTMLVideoElement>(null)
     const [boxWidth, setBoxWidth] = useState(1920); 
  const [isPlaying, setIsPlaying] = useState(false);
+ const [speedInput,setShowSpeedInput]=useState(false)
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 const [timelineFrames, setTimelineFrames] = useState<{ time: number; url: string }[]>([]);
 const [trimStartFrame, setTrimStartFrame] = useState(0);
 const [trimEndFrame, setTrimEndFrame] = useState(5); 
 const [clickCount, setClickCount] = useState(0);
 const [tempStart, setTempStart] = useState<number | null>(null);
+const [grayScaleCount , setGrayScaleCount]=useState(0)
+const [speed,setSpeed] = useState(1)
 const handleFrameClick = (frameIndex: number) => {
   if (clickCount === 0) {
     setTempStart(frameIndex);
@@ -89,7 +94,12 @@ const handleUpload = async (e: React.FormEvent) => {
   if(width && height){
     operations.push({type:'scale',width,height})
   }
-
+  if(grayScale){
+    operations.push({type:'grayscale'})
+  }
+  if(speed){
+    operations.push({type:'speed',rate:speed})
+  }
   const formData = new FormData();
   formData.append('video', videoFile);
   formData.append('operations', JSON.stringify(operations));
@@ -103,9 +113,14 @@ const handleUpload = async (e: React.FormEvent) => {
     const videoBlob = new Blob([res.data], { type: 'video/mp4' });
     const videoUrl = URL.createObjectURL(videoBlob);
     setOutputUrl(videoUrl);
+    toast('🎉 Video processed successfully!',{
+      duration:2000
+    })
   } catch (error) {
     console.error(error);
-    alert('Upload failed');
+   toast('❌ Video processing Failed!',{
+    duration:2000
+   })
   } finally {
     setLoading(false);
   }
@@ -207,23 +222,35 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
   return (
   <>
   <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-gradient-to-br from-blue-400/20 to-purple-400/20 blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-gradient-to-br from-indigo-400/20 to-pink-400/20 blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-gradient-to-br from-cyan-400/10 to-blue-400/10 blur-3xl"></div>
-      </div>
-
-      {/* Desktop Layout */}
       <div className="hidden md:block relative z-10">
-      
+        <header className="px-4 sm:px-6 lg:px-8 pt-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="backdrop-blur-sm bg-black/60 border border-white/20 rounded-2xl px-6 py-4 flex items-center space-x-4 shadow-lg">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                PODLY
+              </h1>
+              <div className="w-px h-8 bg-white/30"></div>
+              <h2 className="text-white/90 font-medium">
+                {session?.user?.name}'s Studio
+              </h2>
+            </div>
+          </div>
+        </header>
      <div className="flex min-h-screen bg-black text-white">
 
  {videoFile ? (
-<div className="w-64 bg-black/60 backdrop-blur-md border-r border-white/20 p-6 shadow-lg">
-  <div className="pt-32 pl-2">
+<div className="w-72 bg-black/60 backdrop-blur-md border-r border-white/20 p-6 shadow-lg">
+  <div className="pt-10 pl-2">
+    <div className='mb-14 text-2xl  '>🎬 Video Effects</div>
     <div className="flex items-center gap-3 text-white">
-      <h1 className="text-2xl font-semibold cursor-pointer" onClick={() => setShowTrimInputs((prev) => !prev)} >Trim</h1>
+      <h1 className="text-2xl font-semibold cursor-pointer" onClick={() => {
+        setShowScaleInput(false)
+        setShowSpeedInput(false)
+        setShowTextInput(false)
+        setShowTrimInputs((prev) => !prev)}} >Trim</h1>
       
       <h1 className='mt-1'>✂️</h1>
       
@@ -262,7 +289,11 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
     
 
         <div className="flex items-center gap-3 text-white">
-      <h1 className="text-2xl font-semibold cursor-pointer" onClick={() => setShowTextInput((prev) => !prev)} >Text</h1>
+      <h1 className="text-2xl font-semibold cursor-pointer" onClick={() =>{
+        setShowTrimInputs(false)
+        setShowTextInput((prev) => !prev)
+        
+        } } >Text</h1>
      <h1 className='mt-1'>💬</h1>
     </div>
     
@@ -282,11 +313,15 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
     }
 
        <div className="flex items-center gap-3 text-white">
-      <h1 className="text-2xl font-semibold cursor-pointer" onClick={() => setShowScaleInput((prev) => !prev)} >Scale</h1>
+      <h1 className="text-2xl font-semibold cursor-pointer" onClick={() => {
+        setShowTextInput(false)
+        setShowSpeedInput(false)
+        
+        setShowScaleInput((prev) => !prev)} }>Scale</h1>
      <h1 className='mt-1'>📐</h1>
     </div>
     
-    <p className="mt-2 text-sm text-white/50 max-w-[180px]">
+    <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
       Add a Scale to your video.
     </p>
     {
@@ -304,6 +339,54 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
         </>
       )
     }
+
+     <div className="flex items-center gap-3 text-white">
+    <h1
+  className="text-xl font-semibold cursor-pointer"
+  onClick={() => {
+    const newValue = !grayScale; // compute next state
+    setGrayScale(newValue);
+
+    toast(newValue ? '🌑 Grayscale has been added!' : '❌ Grayscale has been removed!', {
+      duration: 2000,
+    });
+  }}
+>
+  GrayScale
+</h1>
+<h1 className="mt-1">🌑</h1>
+
+    </div>
+    
+    <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
+     Transform your visuals into stylish black and white.
+    </p>
+
+     <div className="flex items-center gap-3 text-white">
+      <h1 className="text-2xl font-semibold cursor-pointer" onClick={()=>{
+        setShowScaleInput(false)
+        setShowTextInput(false)
+        setShowTrimInputs(false)
+        setShowSpeedInput(prev =>!prev)}} >Speed</h1>
+     <h1 className='mt-1'>🚀</h1>
+    </div>
+    
+    <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
+     Increase or decrease the playback speed 
+    </p>
+    {
+      speedInput && (
+        <>
+        <div className='mt-5'>
+ <label htmlFor="Enter Text">Enter Speed </label>
+        <Input className='border border-white/20 mt-2' placeholder='Range 0.5 - 2.0'  onChange={(e) => setSpeed(parseFloat(e.target.value))}/>
+        </div>
+       
+        </>
+      )
+    }
+
+
   </div>
 </div>
 
@@ -312,7 +395,7 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
        <div className="flex-1 flex flex-col">
             <form className="flex-1">
               {videoFile ? (
-                <div className="flex-1 flex items-center justify-center p-36">
+                <div className="flex-1 flex items-center justify-center p-10">
                   <div className="w-full max-w-6xl">
                    
                     <div 
@@ -392,7 +475,7 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
     onClick={handleUpload}
     className="px-4 py-2 rounded-full border border-white/10 text-sm text-white bg-gradient-to-r from-blue-600 to-purple-700 hover:brightness-110 transition-all shadow-lg"
   >
-    Process
+    Process video
   </button>
                           
                         </div>
@@ -406,12 +489,12 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
                 <div className="flex-1 flex items-center justify-center p-8">
               <Dropzone {...dropzone}>
         <div>
-          <div className="flex justify-between mt-72">
+          <div className="flex justify-between mt-52">
           
             <DropzoneMessage />
           </div>
           <DropZoneArea>
-            <DropzoneTrigger className="flex flex-col hover:bg-blac hover:text-white items-center gap-4 bg-transparent p-10 text-center text-sm" >
+            <DropzoneTrigger className="flex flex-col hover:bg-blac hover:text-white items-center gap-4 bg-transparent p-20 text-center text-sm" >
               <CloudUploadIcon className="size-8" />
               <div>
                 <p className="font-semibold">Upload video</p>

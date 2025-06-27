@@ -23,6 +23,29 @@ function processVideo(inputPath, operations = []) {
         case 'scale':
           filters.push(`scale=${op.width}:${op.height}`);
           break;
+          case 'grayscale':
+            filters.push('hue=s=0')
+            break;
+          case 'speed':{
+            const rate = op.rate || 1
+            
+            filters.push(`setpts=${1/rate}*PTS`)  
+            let atempoFilters =[]
+            let r = rate
+            while(r>2.0){
+              atempoFilters.push('atempo=2.0')
+              r/=2.0
+            }
+            while(r<0.5){
+              atempoFilters.push('atempo=0.5')
+              r/=2.0
+            }
+            atempoFilters.push(`atempo=${r}`)
+            command = command.audioFilters(atempoFilters)
+            break;
+          }
+            
+          break;
       }
     }
 
