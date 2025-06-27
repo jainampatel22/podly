@@ -3,22 +3,19 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import {  Dropzone,
   DropZoneArea,
-  DropzoneDescription,
-  DropzoneFileList,
-  DropzoneFileListItem,
-  DropzoneFileMessage,
-  DropzoneTrigger,
+DropzoneTrigger,
   DropzoneMessage,
-  DropzoneRemoveFile,
-  DropzoneRetryFile,
-  InfiniteProgress,
-  useDropzone, } from '@/components/ui/dropzone';
+useDropzone, } from '@/components/ui/dropzone';
   import { useSession } from 'next-auth/react';
-import { CloudUpload, CloudUploadIcon, Pause, Play, Sparkles } from 'lucide-react';
+import { CloudUpload, CloudUploadIcon, Pause, Play, Scissors, Sparkles } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 export default function UploadForm() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [start, setStart] = useState('0');
   const [duration, setDuration] = useState('5');
+const[showTextInput,setShowTextInput]=useState(false)
+  const [showTrimInputs, setShowTrimInputs] = useState(false);
+  const [showScaleInput,setShowScaleInput]=useState(false)
   const [text, setText] = useState('');
   const [outputUrl, setOutputUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -30,6 +27,24 @@ export default function UploadForm() {
  const [isPlaying, setIsPlaying] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 const [timelineFrames, setTimelineFrames] = useState<{ time: number; url: string }[]>([]);
+const [trimStartFrame, setTrimStartFrame] = useState(0);
+const [trimEndFrame, setTrimEndFrame] = useState(5); 
+const [clickCount, setClickCount] = useState(0);
+const [tempStart, setTempStart] = useState<number | null>(null);
+const handleFrameClick = (frameIndex: number) => {
+  if (clickCount === 0) {
+    setTempStart(frameIndex);
+    setClickCount(1);
+  } else if (clickCount === 1 && tempStart !== null) {
+    const start = Math.min(tempStart, frameIndex);
+    const end = Math.max(tempStart, frameIndex);
+    setTrimStartFrame(start);
+    setTrimEndFrame(end);
+    setClickCount(0);
+    setTempStart(null);
+   
+  }
+};
 
 useEffect(() => {
   if (videoFile) {
@@ -61,8 +76,11 @@ const handleUpload = async (e: React.FormEvent) => {
  const videoFile = fileStatus.file
   const operations = [];
 
-  if (start && duration) {
-    operations.push({ type: 'trim', start: Number(start), duration: Number(duration) });
+  if (trimStartFrame !=null && trimEndFrame !=null &&videoRef.current) {
+    const startTime = timelineFrames[trimStartFrame]?.time ?? 0
+    const endTime = timelineFrames[trimEndFrame]?.time?? 5
+    const duration = endTime-startTime
+    operations.push({ type: 'trim', start:startTime, duration });
   }
 
   if (text) {
@@ -201,26 +219,120 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
       
      <div className="flex min-h-screen bg-black text-white">
 
- {/* {videoFile ? (
-  <div className="w-36 bg-black/50 border-r border-gray-400 p-6">
-    <div className="text-xl font-bold mb-4">jd</div>
-    <div>hi</div>
+ {videoFile ? (
+<div className="w-64 bg-black/60 backdrop-blur-md border-r border-white/20 p-6 shadow-lg">
+  <div className="pt-32 pl-2">
+    <div className="flex items-center gap-3 text-white">
+      <h1 className="text-2xl font-semibold cursor-pointer" onClick={() => setShowTrimInputs((prev) => !prev)} >Trim</h1>
+      
+      <h1 className='mt-1'>✂️</h1>
+      
+    </div>
+    <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
+      Select a range to trim your video.
+    </p>
+     {showTrimInputs && (
+          <div className="mt-6 space-y-4">
+            <div className="flex flex-col text-white text-sm">
+              <label htmlFor="trimStart" className="mb-1">Start Time</label>
+              <input
+                id="trimStart"
+                type="number"
+                value={trimStartFrame}
+                onChange={(e) => setTrimStartFrame(Number(e.target.value))}
+                placeholder="e.g. 0"
+                className="bg-black/30 border border-white/10 rounded px-3 py-2 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex flex-col text-white text-sm">
+              <label htmlFor="trimEnd" className="mb-1">End Time</label>
+              <input
+                id="trimEnd"
+                type="number"
+                value={trimEndFrame}
+                onChange={(e) => setTrimEndFrame(Number(e.target.value))}
+                placeholder="e.g. 5"
+                className="bg-black/30 border border-white/10 rounded px-3 py-2 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+        )}
+       
+    
+
+        <div className="flex items-center gap-3 text-white">
+      <h1 className="text-2xl font-semibold cursor-pointer" onClick={() => setShowTextInput((prev) => !prev)} >Text</h1>
+     <h1 className='mt-1'>💬</h1>
+    </div>
+    
+    <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
+      Add a Text to your video.
+    </p>
+    {
+      showTextInput && (
+        <>
+        <div className='mt-5'>
+ <label htmlFor="Enter Text">Enter Text </label>
+        <Input className='border border-white/20 mt-2' onChange={(e)=>setText(e.target.value)}/>
+        </div>
+       
+        </>
+      )
+    }
+
+       <div className="flex items-center gap-3 text-white">
+      <h1 className="text-2xl font-semibold cursor-pointer" onClick={() => setShowScaleInput((prev) => !prev)} >Scale</h1>
+     <h1 className='mt-1'>📐</h1>
+    </div>
+    
+    <p className="mt-2 text-sm text-white/50 max-w-[180px]">
+      Add a Scale to your video.
+    </p>
+    {
+      showScaleInput && (
+        <>
+        <div className='mt-5'>
+ <label htmlFor="Enter Text">Enter Width </label>
+        <Input className='border border-white/20 mt-2 mb-2' onChange={(e)=>setWidth(e.target.value)}/>
+
+        <label htmlFor="Enter Text">Enter Height </label>
+        <Input className='border border-white/20 mt-2' onChange={(e)=>setHeight(e.target.value)}/>
+
+        </div>
+       
+        </>
+      )
+    }
   </div>
-) : null} */}
-  {/* Main Content */}
+</div>
+
+) : null}
+ 
        <div className="flex-1 flex flex-col">
-            <form onSubmit={handleUpload} className="flex-1">
+            <form className="flex-1">
               {videoFile ? (
                 <div className="flex-1 flex items-center justify-center p-36">
                   <div className="w-full max-w-6xl">
-                    {/* Video Container with Enhanced Styling */}
+                   
                     <div 
                       className="mx-auto relative group"
                       style={{ width: `${boxWidth}px`, maxWidth: '100%' }}
                     >
                       <div className="aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/20 relative">
-                        {/* Video Element */}
-                        <video
+                    
+                      {
+                        outputUrl ? (
+<video
+                          ref={videoRef}
+                          onClick={togglePlay}
+                          src={outputUrl }
+                          className="w-full h-full object-contain cursor-pointer"
+                         
+                          
+                        />
+                        ):(
+                          <video
                           ref={videoRef}
                           onClick={togglePlay}
                           src={videoUrl ?? undefined}
@@ -228,19 +340,21 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
                          
                           
                         />
-              
-                      
-              
+                        )
+                      }
+                        
+                    
                       
                       </div>
-                      <div className="mt-4 overflow-x-auto flex items-center gap-2 bg-gray-900 p-3 rounded-lg border border-white/10">
+                      <div className="mt-4  overflow-x-auto flex items-center gap-2  p-3 rounded-lg border border-white/20">
     {timelineFrames.length > 0 ? (
       timelineFrames.map(({ time, url }, i) => (
         <img
           key={i}
           src={url}
-          className="h-16 w-auto rounded cursor-pointer hover:scale-105 transition-transform"
+          className={`h-16  w-auto rounded cursor-pointer ${i>=trimStartFrame&& i<=trimEndFrame ?"ring-2 ring-blue-500":""} hover:scale-105 transition-transform`}
           onClick={() => {
+            handleFrameClick(i)
             if (videoRef.current) {
               videoRef.current.currentTime = time;
             }
@@ -258,32 +372,33 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
 
                     {/* Bottom Controls */}
                     <div className="mt-8 flex justify-center">
-                      <div className="bg-black/40 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
+                      <div className="bg-black/40 backdrop-blur-xl rounded-2xl p-6 ">
                         <div className="flex items-center gap-4">
                           <button
                             type="button"
                             onClick={togglePlay}
-                            className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg"
+                            className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg"
                           >
                             {isPlaying ? (
                               <Pause className="w-5 h-5 text-white" />
                             ) : (
                               <Play className="w-5 h-5 text-white ml-0.5" />
-                            )}
+                            )} 
                           </button>
                           
-                          <div className="flex-1 mx-4">
-                            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                              <div className="h-full w-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all"></div>
-                            </div>
-                          </div>
+                       
+                            <button
+    type="button"
+    onClick={handleUpload}
+    className="px-4 py-2 rounded-full border border-white/10 text-sm text-white bg-gradient-to-r from-blue-600 to-purple-700 hover:brightness-110 transition-all shadow-lg"
+  >
+    Process
+  </button>
                           
-                          <div className="text-white/70 text-sm font-mono">
-                            00:00 / 00:00
-                          </div>
                         </div>
                       </div>
                     </div>
+                   
                   </div>
                 </div>
               ) : (

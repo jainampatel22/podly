@@ -96,3 +96,20 @@
     @apply bg-background text-foreground;
   }
 }
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  height: 16px;
+  width: 8px;
+  background: #3b82f6; /* blue-500 */
+  border-radius: 2px;
+  cursor: pointer;
+  margin-top: -6px;
+}
+input[type="range"]::-moz-range-thumb {
+  height: 16px;
+  width: 8px;
+  background: #3b82f6;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+}
