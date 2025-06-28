@@ -57,7 +57,7 @@ function splitTextIntoFakeSegments(fullText, duration, chunkDuration = 5) {
 
   return segments;
 }
-// Fixed time formatting for ASS format
+
 function formatTimeForASS(seconds) {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
@@ -76,7 +76,7 @@ PlayResY: 1080
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Arial,24,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,2,0,2,10,10,30,1
+Style: Default,Arial,40,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,2,0,2,10,10,30,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -131,7 +131,7 @@ async function processVideo(inputPath, operations = []) {
               .replace(/:/g, '\\:');    // Escape colons
             
             filters.push(
-              `drawtext=text='${escapedText}':fontcolor=white:fontsize=24:x=${op.x || 10}:y=${op.y || 10}`
+              `drawtext=text='${escapedText}':fontcolor=white:fontsize=30:x=(w-text_w)/2:y=20`
             );
             break;
             

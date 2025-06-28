@@ -15,6 +15,7 @@ export default function UploadForm() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [start, setStart] = useState('0');
   const [duration, setDuration] = useState('5');
+  
 const[showTextInput,setShowTextInput]=useState(false)
   const [showTrimInputs, setShowTrimInputs] = useState(false);
   const [showScaleInput,setShowScaleInput]=useState(false)
@@ -23,6 +24,7 @@ const[showTextInput,setShowTextInput]=useState(false)
   const [loading, setLoading] = useState(false);
   const [grayScale,setGrayScale]=useState(false)
   const {data:session}=useSession()
+  const [processing,setProcessing]=useState(false)
     const [width,setWidth]=useState('')
     const [caption,setCaption]=useState(false)
     const  [height,setHeight]=useState('')
@@ -74,7 +76,7 @@ useEffect(() => {
 }, [videoFile]);
 const handleUpload = async (e: React.FormEvent) => {
   e.preventDefault();
- 
+ setProcessing(true)
     const fileStatus = dropzone.fileStatuses.find(f=>f.status =='success')
     if(!fileStatus){ 
         alert("select video")
@@ -121,6 +123,7 @@ const handleUpload = async (e: React.FormEvent) => {
     toast('🎉 Video processed successfully!',{
       duration:2000
     })
+    setProcessing(false)
   } catch (error) {
     console.error(error);
    toast('❌ Video processing Failed!',{
@@ -142,7 +145,7 @@ const dropzone = useDropzone({
     },
     validation: {
       accept: {
-        "video/*": []
+        "video/*": ['mp4']
       },
       maxSize: 10 * 1024 * 1024,
       maxFiles:1
@@ -223,7 +226,14 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
     };
   });
 };
-
+const downloadVideo=(blobUrl:string,fileName:string = 'rendered-video.mp4')=>{
+const a = document.createElement('a')
+a.href=blobUrl
+a.download=fileName
+document.body.appendChild(a)
+a.click()
+document.body.removeChild(a)
+}
   return (
   <>
   <div className="min-h-screen bg-black relative overflow-hidden">
@@ -249,23 +259,24 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
  {videoFile ? (
 <div className="w-72 bg-black/60 backdrop-blur-md border-r border-white/20 p-6 shadow-lg">
   <div className="pt-10 pl-2">
-    <div className='mb-14 text-2xl  '>🎬  Video Effects</div>
-    <div className="flex items-center gap-3 text-white">
-      <h1 className="text-2xl font-semibold cursor-pointer" onClick={() => {
+    <div className='mb-20 text-2xl  '>🎬  Video Effects</div>
+    <div className="flex mt-3 ml-4 items-center gap-3 text-white">
+      <h1 className="text-2xl mb-2 font-semibold cursor-pointer" onClick={() => {
         setShowScaleInput(false)
         setShowSpeedInput(false)
         setShowTextInput(false)
         setShowTrimInputs((prev) => !prev)}} >Trim</h1>
       
-      <h1 className='mt-1'>✂️</h1>
+      <h1 className='-mt-2'>✂️</h1>
       
     </div>
-    <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
+   
+     {showTrimInputs && (
+          <div className="mt-6 mb-4 space-y-4">
+            <div className="flex flex-col text-white text-sm">
+              <p className=" mb-2 -mt-5 text-sm text-white/50 max-w-[180px]">
       Select a range to trim your video.
     </p>
-     {showTrimInputs && (
-          <div className="mt-6 space-y-4">
-            <div className="flex flex-col text-white text-sm">
               <label htmlFor="trimStart" className="mb-1">Start Time</label>
               <input
                 id="trimStart"
@@ -294,21 +305,22 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
     
 
         <div className="flex items-center gap-3 text-white">
-      <h1 className="text-2xl font-semibold cursor-pointer" onClick={() =>{
+      <h1 className="text-2xl ml-4 mt-7 font-semibold cursor-pointer" onClick={() =>{
         setShowTrimInputs(false)
         setShowTextInput((prev) => !prev)
         
         } } >Text</h1>
-     <h1 className='mt-1'>💬</h1>
+     <h1 className='mt-7'>💬</h1>
     </div>
     
-    <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
-      Add a Text to your video.
-    </p>
+   
     {
       showTextInput && (
         <>
         <div className='mt-5'>
+           <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
+      Add a Text to your video.
+    </p>
  <label htmlFor="Enter Text">Enter Text </label>
         <Input className='border border-white/20 mt-2' onChange={(e)=>setText(e.target.value)}/>
         </div>
@@ -318,21 +330,22 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
     }
 
        <div className="flex items-center gap-3 text-white">
-      <h1 className="text-2xl font-semibold cursor-pointer" onClick={() => {
+      <h1 className="text-2xl mt-7 ml-4 font-semibold cursor-pointer" onClick={() => {
         setShowTextInput(false)
         setShowSpeedInput(false)
         
         setShowScaleInput((prev) => !prev)} }>Scale</h1>
-     <h1 className='mt-1'>📐</h1>
+     <h1 className='mt-7'>📐</h1>
     </div>
     
-    <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
-      Add a Scale to your video.
-    </p>
+    
     {
       showScaleInput && (
         <>
         <div className='mt-5'>
+          <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
+      Add a Scale to your video.
+    </p>
  <label htmlFor="Enter Text">Enter Width </label>
         <Input className='border border-white/20 mt-2 mb-2' onChange={(e)=>setWidth(e.target.value)}/>
 
@@ -347,7 +360,7 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
 
      <div className="flex items-center gap-3 text-white">
     <h1
-  className="text-xl font-semibold cursor-pointer"
+  className="text-xl mt-7 ml-4  font-semibold cursor-pointer"
   onClick={() => {
     const newValue = !grayScale; // compute next state
     setGrayScale(newValue);
@@ -357,32 +370,31 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
     });
   }}
 >
-  GrayScale
+  Grayscale
 </h1>
-<h1 className="mt-1">🌑</h1>
+<h1 className="mt-7">🌑</h1>
 
     </div>
     
-    <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
-     Transform your visuals into stylish black and white.
-    </p>
+   
 
      <div className="flex items-center gap-3 text-white">
-      <h1 className="text-2xl font-semibold cursor-pointer" onClick={()=>{
+      <h1 className="text-2xl mt-7 ml-4 font-semibold cursor-pointer" onClick={()=>{
         setShowScaleInput(false)
         setShowTextInput(false)
         setShowTrimInputs(false)
         setShowSpeedInput(prev =>!prev)}} >Speed</h1>
-     <h1 className='mt-1'>🚀</h1>
+     <h1 className='mt-7'>🚀</h1>
     </div>
     
-    <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
-     Increase or decrease the playback speed 
-    </p>
+    
     {
       speedInput && (
         <>
         <div className='mt-5'>
+          <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
+     Increase or decrease the playback speed 
+    </p>
  <label htmlFor="Enter Text">Enter Speed </label>
         <Input className='border border-white/20 mt-2' placeholder='Range 0.5 - 2.0'  onChange={(e) => setSpeed(parseFloat(e.target.value))}/>
         </div>
@@ -393,25 +405,39 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
 
     <div className="flex items-center gap-3 text-white">
     <h1
-  className="text-xl font-semibold cursor-pointer"
+  className="text-xl mt-7 ml-4 font-semibold cursor-pointer"
   onClick={() => {
     const newValue = !caption; // compute next state
     setCaption(newValue);
 
-    toast(newValue ? '🌑 Grayscale has been added!' : '❌ Grayscale has been removed!', {
+    toast(newValue ? '🌑 Live caption has been added!' : '❌ Live caption has been removed!', {
       duration: 2000,
     });
   }}
 >
   Live Captions
 </h1>
-<h1 className="mt-1">🌑</h1>
+<h1 className="mt-7">🔴</h1>
+
+    </div>
+
+     <div className="flex items-center gap-3 text-white">
+    <h1
+  className="text-xl mt-7 ml-4 font-semibold cursor-pointer"
+  onClick={() => {
+   if(outputUrl){
+    downloadVideo(outputUrl)
+   } 
+   toast("✅ video downloaded successfully")
+  }}
+>
+ Export 
+</h1>
+<h1 className="mt-7">💾</h1>
 
     </div>
     
-    <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
-     Transform your visuals into stylish black and white.
-    </p>
+    
   </div>
 </div>
 
@@ -485,7 +511,7 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
                           <button
                             type="button"
                             onClick={togglePlay}
-                            className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg"
+                            className="w-12 h-12 rounded-full -mt-2 border border-white/10 flex items-center justify-center hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg"
                           >
                             {isPlaying ? (
                               <Pause className="w-5 h-5 text-white" />
@@ -498,9 +524,11 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
                             <button
     type="button"
     onClick={handleUpload}
-    className="px-4 py-2 rounded-full border border-white/10 text-sm text-white bg-gradient-to-r from-blue-600 to-purple-700 hover:brightness-110 transition-all shadow-lg"
+    className="px-4 py-2 rounded-full border border-white/10 text-md -mt-2  bg-gradient-to-r from-blue-500 to-purple-500 text-transparent  bg-clip-text  hover:brightness-110 transition-all shadow-lg"
   >
-    Process video
+ {
+  processing ? (<>Rendering..</>):(<>Render</>)
+ }
   </button>
                           
                         </div>
@@ -511,28 +539,40 @@ const extractTimeLineFrame = (file: File, fps = 1): Promise<{ time: number; url:
                 </div>
               ) : (
                 /* Upload Area with Enhanced Design */
-                <div className="flex-1 flex items-center justify-center p-8">
-              <Dropzone {...dropzone}>
-        <div>
-          <div className="flex justify-between mt-52">
-          
-            <DropzoneMessage />
-          </div>
-          <DropZoneArea>
-            <DropzoneTrigger className="flex flex-col hover:bg-blac hover:text-white items-center gap-4 bg-transparent p-20 text-center text-sm" >
-              <CloudUploadIcon className="size-8" />
-              <div>
-                <p className="font-semibold">Upload video</p>
-                <p className="text-sm text-muted-foreground">
-                  Click here or drag and drop to upload
-                </p>
+                <div className=" items-center justify-center p-8">
+                   <header className="px-4 sm:px-6 lg:px-8 pt-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="backdrop-blur-sm bg-black/60 border border-white/20 rounded-2xl px-6 py-4 flex items-center space-x-4 shadow-lg">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-white" />
               </div>
-            </DropzoneTrigger>
-          </DropZoneArea>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                PODLY
+              </h1>
+              <div className="w-px h-8 bg-white/30"></div>
+              <h2 className="text-white/90 font-medium">
+                {session?.user?.name}'s Studio
+              </h2>
+            </div>
+          </div>
+        </header>
+            <Dropzone {...dropzone}>
+  <div className="flex flex-col items-center justify-center mt-52">
+    <DropzoneMessage />
+
+    <DropZoneArea>
+      <DropzoneTrigger className="w-[500px] hover:bg-black hover:text-white flex flex-col items-center gap-4 bg-transparent p-10 text-center text-sm rounded-xl">
+        <CloudUploadIcon className="size-8" />
+        <div>
+          <p className="font-semibold">Upload video</p>
+          <p className="text-sm text-muted-foreground">
+            Click here or drag and drop to upload
+          </p>
         </div>
- 
-       
-      </Dropzone>
+      </DropzoneTrigger>
+    </DropZoneArea>
+  </div>
+</Dropzone>
                 </div>
               )}
             </form>
