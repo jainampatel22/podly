@@ -262,7 +262,7 @@ document.body.removeChild(a)
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                <Link href='/'>PODLY</Link>
+                <Link href='/'>Podler</Link>
               </h1>
               <div className="w-px h-8 bg-white/30"></div>
               <h2 className="text-white/90 font-medium">

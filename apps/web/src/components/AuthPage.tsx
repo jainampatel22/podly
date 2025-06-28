@@ -39,7 +39,7 @@ useEffect(()=>{
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              PODLY
+              Podler
             </span>
           </div>
         </div>
@@ -56,7 +56,7 @@ useEffect(()=>{
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                Welcome to PODLY
+                Welcome to Podler
               </h1>
               <p className="text-slate-600 text-sm">
                 Access your workspace — sign in to get started!

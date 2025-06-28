@@ -776,7 +776,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                             </div>
                             <a href="/">
                                 <h1 className="cursor-pointer text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                    PODLY
+                                    Podler
                                 </h1>
                             </a>
                             <div className="w-px h-8 bg-gradient-to-b from-slate-200 to-slate-400"></div>
@@ -1016,7 +1016,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                         </div>
                         <a href="/">
                             <h1 className="cursor-pointer text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                PODLY
+                                Podler
                             </h1>
                         </a>
                         <div className="w-px h-6 bg-gradient-to-b from-slate-200 to-slate-400"></div>

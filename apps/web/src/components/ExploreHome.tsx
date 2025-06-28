@@ -321,7 +321,7 @@ finally{
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <span className="text-lg font-semibold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                Welcome to <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Podly</span>
+                Welcome to <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Podler</span>
               </span>
               <ArrowRight className="text-slate-600 w-4 h-4" />
             </div>

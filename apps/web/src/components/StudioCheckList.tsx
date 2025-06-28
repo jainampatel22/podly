@@ -31,7 +31,7 @@ export default  function StudioCheckList() {
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                PODLY
+                Podler
               </Link>
               <div className="w-px h-8 bg-slate-300"></div>
               <h2 className="text-slate-700 font-medium">
@@ -95,7 +95,7 @@ export default  function StudioCheckList() {
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              PODLY
+              Podler
             </h1>
             <div className="w-px h-6 bg-slate-300"></div>
             <h2 className="text-slate-700 text-sm font-medium truncate">

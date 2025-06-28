@@ -24,7 +24,7 @@ export default function Header() {
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo */}
         <h1 className="text-2xl text-blue-700 font-inter font-bold">
-          <Link href="/">Podly</Link>
+          <Link href="/">Podler</Link>
         </h1>
 
         {/* Nav Links */}
