@@ -86,10 +86,10 @@ const { data: sessionData, status } = useSession();
           
 <div className="ml-2">
   {status === "loading" ? (
-    // Optional loading spinner
+ 
     <div>Loading...</div>
   ) : status === "authenticated" && sessionData ? (
-    // ✅ Show user dropdown if signed in
+   
     sessionData.user?.image ? (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -127,7 +127,7 @@ const { data: sessionData, status } = useSession();
       </div>
     )
   ) : (
-    // ✅ Show Sign In if not signed in
+    
     <Button
       onClick={() => router.push('/sign-in')}
       variant="ghost"
@@ -140,11 +140,11 @@ const { data: sessionData, status } = useSession();
         </div>
       </header>
 
-      {/* Main Content */}
+      
       <main className="relative z-10 px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 lg:pt-20">
         <div className="max-w-6xl mx-auto text-center">
           
-          {/* Hero Icon */}
+      
           <div className="flex justify-center mb-8">
             <div className="relative">
               <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg animate-pulse">
@@ -156,7 +156,7 @@ const { data: sessionData, status } = useSession();
             </div>
           </div>
           
-          {/* Main Heading */}
+     
           <div className="space-y-4 mb-8">
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight">
               <span className="block bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-clip-text text-transparent">
@@ -176,19 +176,19 @@ const { data: sessionData, status } = useSession();
             </h1>
           </div>
           
-          {/* Subtitle */}
+  
           <p className="text-lg sm:text-xl lg:text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed mb-16">
             Your online studio to record in high quality, edit in a flash, and go live with a bang. 
             <span className="text-slate-500 italic"> Not necessarily in that order.</span>
           </p>
           
-          {/* Content Type Selection */}
+         
           <div className="mb-16">
             <p className="text-slate-600 mb-8 text-lg">
               What would you like to start creating?
             </p>
             
-            {/* Options Grid */}
+      
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto mb-12">
               {options.map((option) => {
                 const IconComponent = option.icon;

@@ -130,7 +130,7 @@ const handleUpload = async (e: React.FormEvent) => {
 
   setLoading(true);
   try {
-    const res = await axios.post('http://localhost:4000/upload', formData, {
+    const res = await axios.post('https://podly-editor.onrender.com/upload', formData, {
       responseType: 'blob',
       headers: { 'Content-Type': 'multipart/form-data' }
     });

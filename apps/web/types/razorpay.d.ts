@@ -31,5 +31,5 @@ declare var Razorpay: {
 };
 interface RazorpayInstance {
   open(): void
-  // Optional: add more methods if needed
+
 }

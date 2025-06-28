@@ -155,18 +155,18 @@ finally{
     textField: {
       fullWidth: true,
       sx: {
-        // Input border when focused
+       
         '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
           borderColor: 'black',
         },
-        // Label color when focused
+       
         '& .MuiInputLabel-root.Mui-focused': {
           color: 'black',
         },
-        // Remove blue focus ring
+       
         '& .MuiOutlinedInput-root': {
           '&.Mui-focused': {
-            boxShadow: '0 0 0 1px black', // optional subtle glow
+            boxShadow: '0 0 0 1px black', 
             outline: 'none',
           },
         },

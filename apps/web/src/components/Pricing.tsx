@@ -61,8 +61,8 @@ const PricingCard = ({ isYearly, isSelected,href, title, monthlyPrice, yearlyPri
       return;
     }
 
-    const res = await axios.post("http://localhost:3050/create-order", {
-      amount: price * 100, // Razorpay expects amount in paise
+    const res = await axios.post("https://podly-h9la.onrender.com/create-order", {
+      amount: price * 100, 
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
       

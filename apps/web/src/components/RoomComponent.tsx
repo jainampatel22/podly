@@ -49,7 +49,7 @@ export default function RoomComponent({ params }: RoomId) {
     const [recording, setRecording] = useState(false);
     const { data: session } = useSession()
 
-    // Refs for cleanup
+ 
     const animationFrameRef = useRef<number | null>(null)
     const netRef = useRef<bodyPix.BodyPix | null>(null)
     const lastProcessTimeRef = useRef<number>(0)
@@ -61,7 +61,7 @@ export default function RoomComponent({ params }: RoomId) {
 const [selectedImage, setSelectedImage] = useState<string | null>(null);
 const [customImage, setCustomImage] = useState<string | null>(null);
 
-// Debug function to check if image exists
+
 const debugImageExists = async (imagePath: string) => {
     try {
         const response = await fetch(imagePath);
@@ -80,14 +80,14 @@ useEffect(() => {
         animationFrameRef.current = null;
     }
     setProcessedStream(null);
-    setContextProcessedStream(stream); // <-- Always share the raw stream when effect is off
-    // Optionally clear canvas
+    setContextProcessedStream(stream); // 
+    
     const canvas = canvasRef.current;
     if (canvas) {
         const ctx = canvas.getContext('2d');
         if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
-    return; // <-- Don't run the rest of the effect
+    return; 
 }
 
     let isMounted = true;
@@ -211,7 +211,7 @@ const loadBackgroundImages = async () => {
                 await video.play();
             }
 
-            // Wait for video dimensions
+           
             let attempts = 0;
             while ((video.videoWidth === 0 || video.videoHeight === 0) && attempts < 50) {
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -227,7 +227,6 @@ const loadBackgroundImages = async () => {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
 
-            // Start processing
             startProcessing(video, canvas, ctx);
 
         } catch (error: any) {
@@ -241,11 +240,11 @@ const loadBackgroundImages = async () => {
     const startProcessing = (video: HTMLVideoElement, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) => {
         console.log('🎬 Starting video processing...');
         
-        // Create processed stream
-        const processed = canvas.captureStream(25); // Reduced FPS for better performance
+       
+        const processed = canvas.captureStream(25); 
         setProcessedStream(processed);
         setContextProcessedStream(processed);
-        const processInterval = 1000 / 25; // 25 FPS
+        const processInterval = 1000 / 25; // 
 
         const renderFrame = async (currentTime: number) => {
             if (!isMounted || !video || video.readyState < 2) {
@@ -255,7 +254,7 @@ const loadBackgroundImages = async () => {
                 return;
             }
 
-            // Throttle processing
+   
             if (currentTime - lastProcessTimeRef.current < processInterval) {
                 if (isMounted) {
                     animationFrameRef.current = requestAnimationFrame(renderFrame);
@@ -269,7 +268,7 @@ const loadBackgroundImages = async () => {
                 const net = netRef.current;
                 
                 if (net) {
-                    // Get segmentation
+               
                     const segmentation = await net.segmentPerson(video, {
                         flipHorizontal: false,
                         internalResolution: 'medium',
@@ -293,13 +292,13 @@ const loadBackgroundImages = async () => {
                         applyBackgroundWithMask(ctx, canvas, segmentation, video);
                     }
                 } else {
-                    // No background processing, just draw video
+      
                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 }
 
             } catch (error) {
                 console.warn('Error in renderFrame:', error);
-                // Fallback: draw video directly
+                
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             }
 
@@ -317,17 +316,16 @@ const loadBackgroundImages = async () => {
         segmentation: any,
         video: HTMLVideoElement
     ) => {
-        // Step 1: Clear canvas
+       
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Step 2: Draw background
         drawBackground(ctx, canvas, video);
         
-        // Step 3: Apply person mask using pixel manipulation
+     
         const backgroundImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const backgroundData = backgroundImageData.data;
         
-        // Get video frame data
+    
         const tempCanvas = document.createElement('canvas');
         tempCanvas.width = canvas.width;
         tempCanvas.height = canvas.height;
@@ -336,22 +334,22 @@ const loadBackgroundImages = async () => {
         const videoImageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
         const videoData = videoImageData.data;
         
-        // Create final image data
+        
         const finalImageData = ctx.createImageData(canvas.width, canvas.height);
         const finalData = finalImageData.data;
         
-        // Apply mask: person pixels from video, background pixels from background
+
         for (let i = 0; i < segmentation.data.length; i++) {
             const pixelIndex = i * 4;
             
             if (segmentation.data[i] === 1) {
-                // Person pixel - use video
+                
                 finalData[pixelIndex] = videoData[pixelIndex] ?? 0;         // R
                 finalData[pixelIndex + 1] = videoData[pixelIndex + 1] ?? 0; // G
                 finalData[pixelIndex + 2] = videoData[pixelIndex + 2] ?? 0; // B
                 finalData[pixelIndex + 3] = 255;                       // A
             } else {
-                // Background pixel - use background
+               
                 finalData[pixelIndex] = backgroundData[pixelIndex]??0;         // R
                 finalData[pixelIndex + 1] = backgroundData[pixelIndex + 1] ?? 0 ; // G
                 finalData[pixelIndex + 2] = backgroundData[pixelIndex + 2] ?? 0; // B
@@ -359,7 +357,7 @@ const loadBackgroundImages = async () => {
             }
         }
         
-        // Draw the final composited image
+
         ctx.putImageData(finalImageData, 0, 0);
     };
 
@@ -368,20 +366,20 @@ const loadBackgroundImages = async () => {
             case 'image':
                 if (backgroundImage && backgroundImage.complete && backgroundImage.naturalWidth > 0) {
                     try {
-                        // Calculate aspect ratio and scaling
+                       
                         const imgAspect = backgroundImage.naturalWidth / backgroundImage.naturalHeight;
                         const canvasAspect = canvas.width / canvas.height;
                         
                         let drawWidth, drawHeight, drawX, drawY;
                         
                         if (imgAspect > canvasAspect) {
-                            // Image is wider - fit to height
+                           
                             drawHeight = canvas.height;
                             drawWidth = drawHeight * imgAspect;
                             drawX = (canvas.width - drawWidth) / 2;
                             drawY = 0;
                         } else {
-                            // Image is taller - fit to width
+                        
                             drawWidth = canvas.width;
                             drawHeight = drawWidth / imgAspect;
                             drawX = 0;
@@ -453,14 +451,13 @@ const loadBackgroundImages = async () => {
         redirect(`/sign-in?callbackUrl=/room/${params}`)
     }
 
-    // Join room when user is available
     useEffect(() => {
         if (user && socket) {
             socket.emit("joined-room", { roomId: params, peerId: user._id })
         }
     }, [params, user, socket])
 
-    // Send username when we have all required data
+
     useEffect(() => {
         if (socket && user && session?.user?.name) {
             console.log('Sending username:', { peerId: user._id, username: session.user.name })
@@ -471,7 +468,7 @@ const loadBackgroundImages = async () => {
         }
     }, [socket, user, session?.user?.name])
 
-    // Update the socket event handlers
+
     useEffect(() => {
         if (socket && session?.user?.name) {
             const handlePeerUsername = ({ peerId, username }: { peerId: string, username: string }) => {

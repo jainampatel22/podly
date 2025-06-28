@@ -1,4 +1,4 @@
-// app/api/all-invites/route.ts
+
 
 import { PrismaClient } from '@prisma/client'
 import { authOptions } from '../../lib/authOptions'

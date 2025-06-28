@@ -8,7 +8,7 @@ import { peerReducer } from '../Reducers/peerReducer'
 import { addPeerAction } from '../Actions/peerAction'
 
 const ws_local = "https://podly-j8p7.onrender.com"
-// const ws_local = 'http://localhost:8080'
+
 export const SocketContext = createContext<any | null>(null)
 
 const socket = SocketIoClient(ws_local)
@@ -56,7 +56,7 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
         }
     }, [])
 
-    // Handle incoming usernames from other peers
+    
     useEffect(() => {
         const handlePeerUsername = ({ peerId, username }: { peerId: string; username: string }) => {
             console.log('Received peer username:', { peerId, username })
@@ -66,7 +66,7 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
             });
         };
 
-        // Handle existing users when joining a room
+        
         const handleExistingUsers = (existingUsers: {peerId: string, username?: string}[]) => {
             console.log('Received existing users:', existingUsers)
             existingUsers.forEach(user => {
