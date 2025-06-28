@@ -8,9 +8,12 @@ import {  Dropzone,
 DropzoneTrigger,
   DropzoneMessage,
 useDropzone, } from '@/components/ui/dropzone';
+import { redirect, useRouter } from 'next/navigation';
+
   import { useSession } from 'next-auth/react';
 import { CloudUpload, CloudUploadIcon, Pause, Play, Scissors, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import Link from 'next/link';
 export default function UploadForm() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [start, setStart] = useState('0');
@@ -40,6 +43,7 @@ const [clickCount, setClickCount] = useState(0);
 const [tempStart, setTempStart] = useState<number | null>(null);
 const [grayScaleCount , setGrayScaleCount]=useState(0)
 const [speed,setSpeed] = useState(1)
+const router = useRouter()
 const handleFrameClick = (frameIndex: number) => {
   if (clickCount === 0) {
     setTempStart(frameIndex);
@@ -55,6 +59,9 @@ const handleFrameClick = (frameIndex: number) => {
   }
 };
 
+  if (!session) {
+    redirect('/sign-in')
+  }
 useEffect(() => {
   if (videoFile) {
     extractTimeLineFrame(videoFile, 1).then((frames) => {
@@ -62,6 +69,14 @@ useEffect(() => {
     });
   }
 }, [videoFile]);
+
+useEffect(() => {
+  const savedBlobUrl = localStorage.getItem('useruploadedfile');
+  if (savedBlobUrl) {
+    setVideoUrl(savedBlobUrl);
+  }
+}, []);
+
 
 useEffect(() => {
   if (!videoFile) {
@@ -82,6 +97,8 @@ const handleUpload = async (e: React.FormEvent) => {
         alert("select video")
          return
         }
+        const blobUrl = URL.createObjectURL(fileStatus.file)
+        localStorage.setItem('useruploadedfile',blobUrl)
  const videoFile = fileStatus.file
   const operations = [];
 
@@ -245,7 +262,7 @@ document.body.removeChild(a)
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                PODLY
+                <Link href='/'>PODLY</Link>
               </h1>
               <div className="w-px h-8 bg-white/30"></div>
               <h2 className="text-white/90 font-medium">
@@ -540,22 +557,7 @@ document.body.removeChild(a)
               ) : (
                 /* Upload Area with Enhanced Design */
                 <div className=" items-center justify-center p-8">
-                   <header className="px-4 sm:px-6 lg:px-8 pt-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="backdrop-blur-sm bg-black/60 border border-white/20 rounded-2xl px-6 py-4 flex items-center space-x-4 shadow-lg">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                PODLY
-              </h1>
-              <div className="w-px h-8 bg-white/30"></div>
-              <h2 className="text-white/90 font-medium">
-                {session?.user?.name}'s Studio
-              </h2>
-            </div>
-          </div>
-        </header>
+                  
             <Dropzone {...dropzone}>
   <div className="flex flex-col items-center justify-center mt-52">
     <DropzoneMessage />

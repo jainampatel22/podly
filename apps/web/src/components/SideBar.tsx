@@ -35,10 +35,7 @@ export default function Sidebar() {
     { title: "Scheduled", url: "/explore/schedule", icon: Search },
   ];
 
-  const endIcons = [
-    { title: "Settings", url: "/settings", icon: Settings },
-    { title: "What's New ?", url: "/updates", icon: PartyPopper },
-  ];
+
 
   // Check if device is mobile
   useEffect(() => {
@@ -175,42 +172,10 @@ export default function Sidebar() {
 
         {/* Footer Icons */}
         <div className="mt-20 md:mt-56 ml-5 space-y-4 md:space-y-5">
-          {endIcons.map((item, idx) => (
-            <div
-              key={idx}
-              onClick={() => handleMenuClick(item.title, item.url)}
-              className={`
-                flex items-center gap-3 cursor-pointer  
-                ${activeItem === item.title ? "text-blue-500 bg-slate-400" : "text-black"}
-                py-2 pr-4 rounded-r-lg hover:bg-slate-200
-              `}
-            >
-              <item.icon size={20} className="md:w-6 md:h-6" />
-              {(isOpen || isMobile) && (
-                <span className="font-semibold text-slate-700  text-lg group-hover:text-slate-900 transition-colors duration-300">{item.title}</span>
-              )}
-            </div>
-          ))}
+          
 
           {/* User Avatar with Tooltip */}
-          {session?.user?.image && (isOpen || isMobile) && (
-            <div className="mt-24 p-5 ">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <img
-                      src={session.user.image}
-                      alt={userInitial}
-                      className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover cursor-pointer"
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{session.user.name || "User"}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-          )}
+          
         </div>
       </div>
     </>

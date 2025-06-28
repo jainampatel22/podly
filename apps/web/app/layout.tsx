@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import ClientWrapper from "./clientWrapper";
-
+import Script from "next/script";
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -24,16 +24,22 @@ export default function RootLayout({
 }>) {
   return (
    
-   <ClientWrapper>
   
      <html lang="en">
       <body>
-        
-          {children}
+      
+
+   <ClientWrapper>
+          {children}</ClientWrapper>
+      
+         <Script
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          strategy="afterInteractive"
+        />
    
       </body>
     </html>
-   </ClientWrapper>
+ 
    
   );
 }

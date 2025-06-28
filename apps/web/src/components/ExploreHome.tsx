@@ -35,9 +35,7 @@ import React from 'react'
 export default function ExploreHome() {
   const { data: session } = useSession()
   const router= useRouter()
-  if (!session) {
-    redirect('/sign-in')
-  }
+ 
   const [error, setError] = useState<string | null>(null);
 const [loading,setLoading] =useState<boolean>(false)
 
@@ -63,7 +61,7 @@ const [date, setDate] = React.useState<Date | undefined>(new Date())
       id: 'edit',
       icon: ScissorsLineDashed,
       label: 'Edit',
-      href: '#',
+      href: '/studio/editor',
       color: 'from-purple-500 to-indigo-600',
       hoverColor: 'hover:from-purple-600 hover:to-indigo-700',
       shadow: 'shadow-purple-500/25 hover:shadow-purple-500/40'

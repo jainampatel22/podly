@@ -3,49 +3,63 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {CustomCheckbox} from "@/components/ui/checkbox";
-import { Play, Mic, Video, Users, Sparkles, ArrowRight } from "lucide-react";
+import { Play, Mic, ScissorsLineDashed,Edit,Video, Users, Sparkles, ArrowRight, Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import HomeComponent from "@/components/HomeComponent";
 export default function Index() {
   const [contentType, setContentType] = useState("");
   const router = useRouter();
 const { data: sessionData, status } = useSession();
   const userInitial = sessionData?.user?.name?.charAt(0).toUpperCase() || "U";
+  
+  const studioName = (sessionData?.user?.name ?? "user-studio").trim().toLowerCase().replace(/\s+/g, '-');
   const options = [
     { 
-      id: "podcast", 
-      label: "Podcasts", 
-      value: "PODCAST",
-      icon: Mic,
-      description: "Audio conversations that inspire"
-    },
-    { 
-      id: "interview", 
-      label: "Interview", 
-      value: "INTERVIEW",
-      icon: Users,
-      description: "One-on-one meaningful discussions"
-    },
-    { 
-      id: "videochat", 
-      label: "Video Chat", 
-      value: "VIDEOCHAT",
+      id: "meeting", 
+      label: "Meeting room", 
+      value: "Meeting",
       icon: Video,
-      description: "Face-to-face connections"
+       href: `/studio/${studioName}-studio`,
+      description: "Join meeting room & start recording."
+
     },
     { 
-      id: "webinar", 
-      label: "Webinar", 
-      value: "WEBINAR",
+      id: "edit", 
+      label: "Studio", 
+      value: "studio",
+      icon: ScissorsLineDashed,
+      href:`/studio/editor`,
+      description: "Enter studio & start editing videos."
+    },
+    { 
+      id: "plan", 
+      label: "Schedule", 
+      value: "VIDEOCHAT",
+      icon: Calendar,
+      href:'/schedule',
+      description: "Schedule a live call with your friends,family or colleague."
+    },
+    { 
+      id: "projects", 
+      label: "Projects", 
+      value: "Projects",
+      href:`/explore/projects`,
       icon: Play,
-      description: "Educational presentations"
+      description: "Go and check your recorded videos!"
     },
   ];
   
   const handleExplore = () => {
-    console.log("Exploring with content type:", contentType);
+    const selectedOption = options.find((option) => option.value === contentType);
+    if(selectedOption && typeof selectedOption.href == 'string' ){
+      router.push(selectedOption?.href)
+    }
+    else{
+      alert('select field')
+    }
   };
   
   return (
@@ -247,23 +261,24 @@ const { data: sessionData, status } = useSession();
           {/* CTA Button */}
           <div className="pb-20">
             <Button 
-              onClick={handleExplore}
-              size="lg"
-              className={`
-                bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
-                text-white font-semibold text-lg px-8 py-4 rounded-2xl
-                shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30
-                transition-all duration-300 hover:scale-105
-                group relative overflow-hidden
-              `}
-            >
-              <span className="relative z-10 flex items-center space-x-2">
-               <Link href='/explore/home'> <span>Start Creating</span></Link>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </Button>
-            
+  onClick={handleExplore}
+  size="lg"
+  disabled={!contentType}
+  className={`
+    ${!contentType ? 'opacity-50 cursor-not-allowed' : ''}
+    bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
+    text-white font-semibold text-lg px-8 py-4 rounded-2xl
+    shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30
+    transition-all duration-300 hover:scale-105
+    group relative overflow-hidden
+  `}
+>
+  <span className="relative z-10 flex items-center space-x-2">
+    <span>Start Creating</span>
+    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+  </span>
+  <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+</Button>
             <p className="text-slate-500 text-sm mt-4">
               No credit card required • Free to start
             </p>
@@ -271,6 +286,10 @@ const { data: sessionData, status } = useSession();
           
         </div>
       </main>
+      <div>
+
+       <HomeComponent/>
+      </div>
     </div>
   );
 }
