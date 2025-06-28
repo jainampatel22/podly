@@ -6,7 +6,9 @@ const fs = require('fs');
 
 const {processVideo} = require('./ffmpeg/processVideo')
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin:'https://podly-web.vercel.app'
+}));
 app.use(express.json());
 app.use('/outputs', express.static(path.join(__dirname, 'outputs')));
 
