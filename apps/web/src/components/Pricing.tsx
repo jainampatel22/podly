@@ -28,7 +28,7 @@ type PricingCardProps = {
 
 const PricingHeader = ({ title, subtitle }: { title: string; subtitle: string }) => (
   <section className="text-center pt-1">
-     <span className="ml-2 text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+     <span className="ml-2 text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
         {title}
       </span>
     <p className="text-xl text-slate-500 italic pt-1">{subtitle}.</p>
@@ -108,7 +108,7 @@ const PricingCard = ({ isYearly, isSelected,href, title, monthlyPrice, yearlyPri
  return (
     <Card
     className={cn(`w-72 flex flex-col justify-between py-1 border-2 mx-auto sm:mx-0`, {
-      "border-rose-300": isSelected,
+      "border-purple-500": isSelected,
       "border-zinc-300": popular && !isSelected,
       "border-zinc-400": !popular && !isSelected,
       "animate-background-shine bg-white dark:bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] transition-colors": exclusive,

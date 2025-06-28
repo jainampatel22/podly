@@ -1002,7 +1002,8 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                             </Button>
 
                             <Button className="backdrop-blur-sm bg-white/20 hover:bg-red-500/20 border border-white/30 hover:border-red-500/30 text-slate-700 hover:text-red-500 font-medium  rounded-2xl p-4 transition-all duration-300 hover:scale-105 shadow-lg">
-                                <PhoneOff size={24} />
+                               <Link href={`/studio/${session.user?.name}-studio`}> <PhoneOff size={24} /></Link>
+                                
                             </Button>
                         </div>
                     </div>

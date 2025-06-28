@@ -7,8 +7,9 @@ import { Play, Mic, ScissorsLineDashed,Edit,Video, Users, Sparkles, ArrowRight, 
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import Link from "next/link";
+
 import HomeComponent from "@/components/HomeComponent";
+
 export default function Index() {
   const [contentType, setContentType] = useState("");
   const router = useRouter();
@@ -78,7 +79,7 @@ const { data: sessionData, status } = useSession();
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Podler
             </span>
           </div>
@@ -289,6 +290,7 @@ const { data: sessionData, status } = useSession();
       <div>
 
        <HomeComponent/>
+      
       </div>
     </div>
   );

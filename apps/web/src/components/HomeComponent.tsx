@@ -1,11 +1,13 @@
 'use client'
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Globe } from "lucide-react";
 import { Button } from "./ui/button";
 import Razorpay from 'razorpay'
 import Link from "next/link";
 import Pricing from "./Pricing";
 import axios from 'axios'
 import { useEffect } from "react";
+import Demo from "./Demo";
+import Footer from "./Footer";
 declare global {
   interface Window {
     Razorpay: any;
@@ -17,39 +19,7 @@ export default function HomeComponent(){
 
 
 
-    const handleTest =async()=>{
-        try {
-            const res = await axios.post('http://localhost:3050/create-order',{
-           
-            })
-            
-   const order= await res.data
-     if (typeof window === "undefined" || !(window as any).Razorpay) {
-      alert("Razorpay SDK not loaded yet. Please try again.");
-      return;
-    }
-            const options = {
-              key:'rzp_test_e0ieOqhIqhit07',
-              amount:order.amount,
-              currency:order.currency,
-              name:"PODLER",
-              description:"Test payment",
-              order_id:order.id,
-              handler:function (response:any){
-                alert("payment succesfull! payment id"+response.razorpay_payment_id)
-              },
-              theme:{
-                 color: "#3399cc"
-              }
-            }
-            const rzp = new(window as any). Razorpay(options);
-    rzp.open();
-
-        } catch (error) {
-              console.error('Payment error:', error);
-    alert('Payment initialization failed. Please try again.');
-        }
-    }
+    
     return (
         <>
         <Pricing/>
@@ -75,18 +45,21 @@ export default function HomeComponent(){
     shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30
     transition-all duration-300 hover:scale-105
     group relative overflow-hidden"><span className="relative z-10 flex items-center space-x-2">
-    <Link href="/explore/projects">Check</Link>
+    <Link href="/explore/meetings">Check</Link>
     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
   </span></Button></div>
 
   <div className="flex justify-center item-center">
     <div className="mt-10">
-        <p className="text-lg  sm:text-xl lg:text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed mb-16">Still not accepted? <span className="text-slate-500 italic ">Go and schedule <Link href="/schedule" className="underline cursor-pointer">again</Link></span>. </p>
+        <p className="text-lg  sm:text-xl lg:text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed">Still not accepted? <span className="text-slate-500 italic ">Go and schedule <Link href="/schedule" className="underline cursor-pointer">again</Link></span>. </p>
     </div>
-    <Button className="" onClick={()=>handleTest()}>BUY NOW</Button>
+    
   </div>
   </div>
 </div>
+<Demo/>
+<Footer/>
+
 
         </>
     )
