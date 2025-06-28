@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog"
 
 import { Label } from "@/components/ui/label"
-// Mock session for demo - replace with actual auth logic
+
 
 export default function Projects() {
   type Video = {
@@ -40,7 +40,7 @@ export default function Projects() {
   const { data: session } = useSession();
   const [playingUrl, setPlayingUrl] = useState<string | null>(null);
 
-  // Mock video data for demo
+
   
 
   useEffect(() => {
@@ -55,24 +55,35 @@ export default function Projects() {
    }, []);
 const downloadVideo = async (url: string, fileName: string) => {
   try {
-    const res = await fetch(url);
+    const webmres = await fetch(url);
 
-    if (!res.ok) {
-      throw new Error(`Failed to fetch video: ${res.statusText}`);
+    if (!webmres.ok) {
+      throw new Error(`Failed to fetch video: ${webmres.statusText}`);
     }
 
-    const blob = await res.blob();
-    const blobUrl = window.URL.createObjectURL(blob);
+    const webmblob = await webmres.blob();
+    const formData = new FormData()
+    formData.append('video',webmblob)
+     const mp4Response = await fetch("/convert", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!mp4Response.ok) {
+      throw new Error("Conversion failed");
+    }
+    const mp4blob = await mp4Response.blob();
+    const mp4Url = URL.createObjectURL(mp4blob);
 
     const link = document.createElement("a");
-    link.href = blobUrl;
+    link.href = mp4Url;
     link.download = fileName;
     document.body.appendChild(link);
     link.click();
 
     // Cleanup
     document.body.removeChild(link);
-    window.URL.revokeObjectURL(blobUrl);
+    window.URL.revokeObjectURL(mp4Url);
   } catch (err) {
     console.error("Error downloading video:", err);
   }
