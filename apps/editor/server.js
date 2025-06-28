@@ -4,7 +4,8 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 
-const {processVideo} = require('./ffmpeg/processVideo')
+const {processVideo} = require('./ffmpeg/processVideo');
+const { PassThrough } = require('stream');
 const app = express();
 app.use(cors({
   origin:'https://podly-web.vercel.app'
@@ -14,7 +15,7 @@ app.use('/outputs', express.static(path.join(__dirname, 'outputs')));
 
 const upload = multer({ dest: 'uploads/' });
 
-// Ensure outputs directory exists
+
 const outputDir = path.join(__dirname, 'outputs');
 if (!fs.existsSync(outputDir)) {
   fs.mkdirSync(outputDir, { recursive: true });
@@ -36,9 +37,27 @@ const operations = JSON.parse(req.body.operations);
     res.status(500).json({ error: 'Video processing failed.' });
   }
   finally {
-    // Cleanup the uploaded file
+
     fs.unlinkSync(inputPath);
   }
+});
+
+app.post('/convert',upload.single('video'),(req,res)=>{
+   if (!req.file) return res.status(400).send('No file uploaded');
+   const inputStream = new PassThrough()
+     inputStream.end(req.file.buffer);
+       res.setHeader('Content-Disposition', 'attachment; filename=converted.mp4');
+  res.setHeader('Content-Type', 'video/mp4');
+  ffmpeg(inputStream)
+    .inputFormat('webm')
+    .videoCodec('libx264')
+    .audioCodec('aac')
+    .format('mp4')
+    .on('error', (err) => {
+      console.error('FFmpeg error:', err);
+      res.status(500).send('Conversion failed');
+    })
+    .pipe(res, { end: true });
 });
 
 const PORT = 4000;

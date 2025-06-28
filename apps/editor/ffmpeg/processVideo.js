@@ -86,7 +86,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     const start = formatTimeForASS(seg.start);
       if (seg.end <= seg.start) return '';
     const end = formatTimeForASS(seg.end);
-    // Clean text for ASS format
+  
     const cleanText = seg.text.trim().replace(/\n/g, ' ').replace(/\r/g, '');
     
     const dialogue = `Dialogue: 0,${start},${end},Default,,0,0,0,,${cleanText}`;
@@ -124,7 +124,7 @@ async function processVideo(inputPath, operations = []) {
             break;
             
           case 'drawtext':
-            // Fix text escaping
+           
             const escapedText = op.text
               .replace(/\\/g, '\\\\')  // Escape backslashes
               .replace(/'/g, "'\\''")   // Escape single quotes
@@ -183,7 +183,7 @@ async function processVideo(inputPath, operations = []) {
               transcriptionToASS(transcribeResult.segments, assPath);
             } else if (transcribeResult.text) {
               console.log('Using fallback single segment');
-              // Fallback: create single segment for entire text
+
               const duration = await getVideoDuration(inputPath);
              const fakeSegments = splitTextIntoFakeSegments(transcribeResult.text, duration); // or use real video duration
 transcriptionToASS(fakeSegments, assPath);
@@ -193,10 +193,9 @@ transcriptionToASS(fakeSegments, assPath);
               break;
             }
             
-            // Fix path escaping for all platforms
             let escapedPath = path.resolve(assPath);
             if (process.platform === 'win32') {
-              // Windows: convert backslashes to forward slashes and escape colons
+              
               escapedPath = escapedPath.replace(/\\/g, '/').replace(/:/g, '\\:');
             }
             
@@ -218,7 +217,7 @@ transcriptionToASS(fakeSegments, assPath);
         .on('stderr', line => console.log('ffmpeg stderr:', line))
         .on('error', (err) => {
           console.error('FFmpeg error:', err);
-          // Cleanup temp files
+      
           tempFiles.forEach(file => {
             try { fs.unlinkSync(file); } catch(e) {}
           });
@@ -226,7 +225,7 @@ transcriptionToASS(fakeSegments, assPath);
         })
         .on('end', () => {
           console.log('Video processing completed');
-          // Cleanup temp files
+         
           tempFiles.forEach(file => {
             try { 
               fs.unlinkSync(file); 
@@ -242,7 +241,7 @@ transcriptionToASS(fakeSegments, assPath);
       stream.on('data', chunk => chunks.push(chunk));
       stream.on('error', (err) => {
         console.error('Stream error:', err);
-        // Cleanup temp files
+       
         tempFiles.forEach(file => {
           try { fs.unlinkSync(file); } catch(e) {}
         });
@@ -251,7 +250,7 @@ transcriptionToASS(fakeSegments, assPath);
       
     } catch (error) {
       console.error('Process error:', error);
-      // Cleanup temp files
+
       tempFiles.forEach(file => {
         try { fs.unlinkSync(file); } catch(e) {}
       });
