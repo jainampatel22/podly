@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import ClientWrapper from "./clientWrapper";
 import Script from "next/script";
+
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -23,23 +25,35 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-   
-  
-     <html lang="en">
-      <body>
-      
+    <html lang="en">
+      <head>
+       
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-SVZJMN8VLY"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-SVZJMN8VLY', {
+              page_path: window.location.pathname,
+            });
+          `}
+        </Script>
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <ClientWrapper>
+          {children}
+        </ClientWrapper>
 
-   <ClientWrapper>
-          {children}</ClientWrapper>
-      
-         <Script
+
+        <Script
           src="https://checkout.razorpay.com/v1/checkout.js"
           strategy="afterInteractive"
         />
-   
       </body>
     </html>
- 
-   
   );
 }
