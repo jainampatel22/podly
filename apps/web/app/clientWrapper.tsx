@@ -1,5 +1,6 @@
 
 'use client';
+import { Analytics } from "@vercel/analytics/next"
 import { SessionProvider } from "next-auth/react";
 import { SocketProvider } from "./Context/SocketContext";
 import { Toaster } from "@/components/ui/sonner";
@@ -10,6 +11,7 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
       <SocketProvider>
         {children}
         <PageViewTracker/>
+        <Analytics/>
         <Toaster position="top-right" />
       </SocketProvider>
     </SessionProvider>

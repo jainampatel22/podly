@@ -10,3 +10,7 @@ export default async function Invite({params}:Props){
     <InviteUrl name={name}/>
   )
 }
+export const metadata = {
+  title: 'Podler | Invites',
+  description: 'Your online studio to record in high quality, edit in a flash, and go live with a bang. Not necessarily in that order. ',
+};
