@@ -11,7 +11,7 @@ export default function AuthPage(){
   const router = useRouter()
   const {data:session }=useSession()
 const searchParams = useSearchParams()
-const callbackUrl = searchParams.get('callbackUrl') || '/explore/home'
+const callbackUrl = searchParams.get('callbackUrl') || ''
   const handleGoogleSignIn = () => {
     setIsSigningIn(true);
   signIn("google",{callbackUrl:callbackUrl})

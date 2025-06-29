@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { getServerSession } from "next-auth"
 import * as bodyPix from '@tensorflow-models/body-pix'
 import '@tensorflow/tfjs';
+import { useRouter } from "next/navigation"
 import {
   Dialog,
   DialogClose,
@@ -24,12 +25,13 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
+import { toast } from "sonner"
 type RoomId = {
     params: string
 }
 
 export default function RoomComponent({ params }: RoomId) {
+    const router= useRouter()
     const [hasUploaded, setHasUploaded] = useState(false);
     const [roomName, setRoomName] = useState("untitled")
     const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -426,26 +428,26 @@ const loadBackgroundImages = async () => {
  
 
     // Debug logs
-    useEffect(() => {
-        console.log('🎨 Background state:', {
-            backgroundType,
-            imageLoaded: !!backgroundImage,
-            imageComplete: backgroundImage?.complete,
-            imageDimensions: backgroundImage ? `${backgroundImage.naturalWidth}x${backgroundImage.naturalHeight}` : 'N/A',
-            imageSrc: backgroundImage?.src
-        });
-    }, [backgroundType, backgroundImage]);
+    // useEffect(() => {
+    //     console.log('🎨 Background state:', {
+    //         backgroundType,
+    //         imageLoaded: !!backgroundImage,
+    //         imageComplete: backgroundImage?.complete,
+    //         imageDimensions: backgroundImage ? `${backgroundImage.naturalWidth}x${backgroundImage.naturalHeight}` : 'N/A',
+    //         imageSrc: backgroundImage?.src
+    //     });
+    // }, [backgroundType, backgroundImage]);
 
-    useEffect(() => {
-        console.log('📊 Component state:', {
-            stream: !!stream,
-            processedStream: !!processedStream,
-            modelLoaded,
-            modelError,
-            isVideoOff,
-            backgroundType
-        });
-    }, [stream, processedStream, modelLoaded, modelError, isVideoOff, backgroundType]);
+    // useEffect(() => {
+    //     // console.log('📊 Component state:', {
+    //     //     stream: !!stream,
+    //     //     processedStream: !!processedStream,
+    //     //     modelLoaded,
+    //     //     modelError,
+    //     //     isVideoOff,
+    //     //     backgroundType
+    //     });
+    // }, [stream, processedStream, modelLoaded, modelError, isVideoOff, backgroundType]);
 
     if (!session) {
         redirect(`/sign-in?callbackUrl=/room/${params}`)
@@ -539,16 +541,20 @@ const loadBackgroundImages = async () => {
         }
     }
 
-    const toggleMute = () => {
-        if (stream) {
-            const audioTrack = stream.getAudioTracks()[0]
-            if (audioTrack) {
-                audioTrack.enabled = !audioTrack.enabled
-                setIsMuted(!audioTrack.enabled)
-            }
+   const toggleMute = () => {
+    if (stream) {
+        const audioTrack = stream.getAudioTracks()[0];
+        if (audioTrack) {
+            const newAudioState = !audioTrack.enabled;
+            audioTrack.enabled = newAudioState;
+            setIsMuted(!newAudioState);
+
+            // ✅ Toast feedback
+            toast(newAudioState ? "✅ 🎙️ Mic unmuted" : "❌ 🎙️ Mic muted"
+            );
         }
     }
-
+}
     const toggleVideo = () => {
         if (stream && user) {
             const videoTrack = stream.getVideoTracks()[0]
@@ -563,6 +569,7 @@ const loadBackgroundImages = async () => {
                     peerId: user._id,
                     isVideoOff: newIsVideoOff
                 })
+                 toast(newIsVideoOff ? "🚫 📷 Video turned off" : "✅ 📷 Video turned on");
             }
         }
     }
@@ -601,6 +608,7 @@ const loadBackgroundImages = async () => {
             setRecording(true);
             MediaRecorderRef.current.start(1000);
         }
+        toast('🎙️ Recording has been started.')
     };
 
     const stopRecording = () => {
@@ -608,6 +616,7 @@ const loadBackgroundImages = async () => {
             MediaRecorderRef.current.stop();
             setRecording(false);
         }
+         toast('🛑 Recording has been stoped.')
     };
 
     const handleStartRecording = async () => {
@@ -645,10 +654,12 @@ const loadBackgroundImages = async () => {
             });
             if (!uploadRes.ok) throw new Error("Upload failed");
             console.log('uploaded to s3 successfully', fileName);
+            const url ='/explore/projects'
+            toast(`🚀 Your video has been recorded successfully`)
             setRecordedChunks([]); // Clear after successful upload
         } catch (error) {
             console.error("❌ Upload failed:", error);
-            alert("Upload failed");
+           toast("❌ error recording video")
         }
     };
 
@@ -668,9 +679,9 @@ const loadBackgroundImages = async () => {
         }
         if (isVideoOff) {
             return (
-                <div className="text-white bg-gray-900 flex flex-col items-center justify-center w-full h-full">
-                    <VideoOff size={48} className="mb-2 text-gray-400" />
-                    <span className="text-sm text-gray-400">Camera is off</span>
+                <div className="text-white bg-gray-400 flex flex-col items-center justify-center w-full h-full">
+                    <VideoOff size={48} className="mb-2 text-black" />
+                    <span className="text-sm text-black">Camera is off</span>
                 </div>
             );
         }
@@ -695,7 +706,7 @@ const loadBackgroundImages = async () => {
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-2"></div>
                     <span className="text-sm text-gray-300">Loading camera effects...</span>
                     <span className="text-xs text-gray-400 mt-1">
-                        {backgroundType === 'image' ? 'Loading background image...' : 'Initializing AI model...'}
+                        {backgroundType === 'image' ? 'Loading background image...' : 'Please wait turning on model...'}
                     </span>
                 </div>
             );
@@ -713,10 +724,12 @@ const loadBackgroundImages = async () => {
             <div className="text-white bg-gray-900 flex flex-col items-center justify-center w-full h-full">
                 <VideoOff size={48} className="mb-2 text-gray-400" />
                 <span className="text-sm text-gray-400">No camera available</span>
+                
             </div>
         );
     };
 const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    toast('❌ Failed uploading image. apply blur filter for now and then try for uploading image again.')
   const file = e.target.files?.[0];
   if (!file) return;
   const reader = new FileReader();
@@ -728,6 +741,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBackgroundEffectEnabled(true);
   };
   reader.readAsDataURL(file);
+
 };
 
     return (
@@ -921,7 +935,9 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                 ? 'border-blue-500 bg-blue-50' 
                 : 'border-gray-200 hover:border-gray-300'
             }`}
-            onClick={() => setBackgroundType('blur')}
+            onClick={() => {setBackgroundType('blur')
+                toast('✅ Blur effect added')
+            }}
           >
             <div className="flex flex-col items-center text-center">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-2">
@@ -981,6 +997,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                                 onClick={toggleVideo}
                             >
                                 {isVideoOff ? (
+                                    
                                     <VideoOff size={24} className="text-red-500" />
                                 ) : (
                                     <Video size={24} />
@@ -998,9 +1015,13 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                                 )}
                             </Button>
 
-                            <Button className="backdrop-blur-sm bg-white/20 hover:bg-red-500/20 border border-white/30 hover:border-red-500/30 text-slate-700 hover:text-red-500 font-medium  rounded-2xl p-4 transition-all duration-300 hover:scale-105 shadow-lg">
-                               <Link href={`/studio/${session.user?.name}-studio`}> <PhoneOff size={24} /></Link>
-                                
+                            <Button onClick={()=>{
+                                 {toast("Meeting has been ended ✅ ")}
+                                 router.push(`/studio/${session.user?.name}-studio`)
+                            }} className="backdrop-blur-sm bg-white/20 hover:bg-red-500/20 border border-white/30 hover:border-red-500/30 text-slate-700 hover:text-red-500 font-medium  rounded-2xl p-4 transition-all duration-300 hover:scale-105 shadow-lg">
+                              
+                            <PhoneOff size={24} />
+                               
                             </Button>
                         </div>
                     </div>

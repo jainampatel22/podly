@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/dialog"
 
 import { Label } from "@/components/ui/label"
+import { redirect } from "next/navigation";
+import { div } from "@tensorflow/tfjs";
 
 
 export default function Projects() {
@@ -43,6 +45,7 @@ export default function Projects() {
 
   
 
+   if (!session) { redirect(`/sign-in?callbackUrl=/explore/projects`) }
   useEffect(() => {
     // Simulate API call
  fetch("/api/get-user-video", { credentials: "include" })
@@ -116,6 +119,9 @@ const downloadVideo = async (url: string, fileName: string) => {
   }
 
   return (
+
+
+
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -220,8 +226,8 @@ const downloadVideo = async (url: string, fileName: string) => {
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
                 <FileVideo className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-700 mb-2">Loading your projects...</h3>
-              <p className="text-slate-600">Please wait while we fetch your recordings</p>
+              <h3 className="text-xl font-semibold text-slate-700 mb-2">No Projects ...</h3>
+              <p className="text-slate-600">Join meeting room and start creating projects.. </p>
             </div>
           ) : filteredVideos.length === 0 ? (
             <div className="text-center py-20">

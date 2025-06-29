@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import axios from 'axios'
+import { toast } from "sonner"
 type PricingSwitchProps = {
   onSwitch: (value: string) => void
 }
@@ -129,7 +130,7 @@ const PricingCard = ({ isYearly, isSelected,href, title, monthlyPrice, yearlyPri
           <CardTitle className="text-zinc-700 dark:text-zinc-300 text-lg">{title}</CardTitle>
         )}
         <div className="flex gap-0.5">
-          <h3 className="text-3xl font-bold">{yearlyPrice && isYearly ? "$" + yearlyPrice : monthlyPrice ? "$" + monthlyPrice : "Custom"}</h3>
+          <h3 className="text-3xl font-bold">{yearlyPrice && isYearly ? "$" + yearlyPrice : monthlyPrice ? "₹" + monthlyPrice : "Custom"}</h3>
           <span className="flex flex-col justify-end text-sm mb-1">{yearlyPrice && isYearly ? "/year" : monthlyPrice ? "/month" : null}</span>
         </div>
         <CardDescription className="pt-1.5 h-12">{description}</CardDescription>
@@ -141,7 +142,12 @@ const PricingCard = ({ isYearly, isSelected,href, title, monthlyPrice, yearlyPri
       </CardContent>
     </div>
     <CardFooter className="mt-2">
-      <Button onClick={()=>handleTest()} className="relative inline-flex w-full items-center justify-center rounded-md bg-black text-white dark:bg-white px-6 font-medium  dark:text-black transition-colors focus:outline-none ">
+      <Button onClick={()=>{
+        toast('Premium features are still in development, but you’re welcome to buy early if you’d like to support us. 😊')
+        handleTest()
+      }} 
+      
+      className="relative inline-flex w-full items-center justify-center rounded-md bg-black text-white dark:bg-white px-6 font-medium  dark:text-black transition-colors focus:outline-none ">
         <div  className="absolute -inset-0.5 -z-10 rounded-lg bg-gradient-to-b from-[#c7d2fe] to-[#8678f9] opacity-75 blur" />
         {actionLabel}
       </Button>
@@ -161,7 +167,7 @@ export default function Pricing(){
     const plans = [
     {
       title: "Basic",
-      monthlyPrice: 4,
+      monthlyPrice: 199,
       yearlyPrice: 40,
       description: "Essential features you need to get started",
       features: ["Virtual Backgrounds", "Video transcription", "Live captions"],
@@ -170,7 +176,7 @@ export default function Pricing(){
     },
     {
       title: "Pro",
-      monthlyPrice: 8,
+      monthlyPrice: 499,
       yearlyPrice: 89,
       description: "Perfect for owners of small & medium businessess",
       features: ["Basic Features", "Live call Transcription", "Editor Pro"],

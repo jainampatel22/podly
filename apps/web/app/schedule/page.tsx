@@ -8,7 +8,7 @@ import axios from 'axios'
 import { useState } from 'react'
 import React from 'react'
 import dayjs from 'dayjs'
-import { useRouter } from 'next/navigation'
+import { redirect, useRouter } from 'next/navigation'
 import {
   Dialog,
   DialogClose,
@@ -31,7 +31,7 @@ export default  function Explore() {
     const studioName = (fetchstudioName ?? "user-studio").trim().toLowerCase().replace(/\s+/g, '-');
   const [open, setOpen] = useState(false);
   const [time, setTime] = React.useState(dayjs())
-  const [ name,setName]= useState<string | undefined>('Jainam Patel')
+  const [ name,setName]= useState<string | undefined>('')
   const [email, setEmail] = useState<string | undefined>('')
   const [subject, setSubject] = useState<string | undefined>('Late Night Talks')
   const [date, setDate] = React.useState<Date | undefined>(new Date())
@@ -39,6 +39,7 @@ export default  function Explore() {
  
   const [error, setError] = useState<string | null>(null);
 const [loading,setLoading] =useState<boolean>(false)
+ if (!session) { redirect(`/sign-in?callbackUrl=/schedule`) }
 const sendMail = async()=>{
     if (!name || !email || !subject || !date || !time) {
     setError("All fields are required.");

@@ -8,9 +8,17 @@ import { Button } from "@/components/ui/button"
 import HostStream from "@/components/hostStream"
 import { Monitor, Sparkles } from "lucide-react"
 import Link from "next/link"
+import { useEffect } from "react"
 export default  function StudioCheckList() {
- const {data:session} = useSession()
-  if (!session) { redirect('/sign-in?callbackUrl=/studio') }
+ const {data:session,status} = useSession()
+useEffect(()=>{
+if(status == 'loading') return
+
+  if (!session) { redirect(`/sign-in?callbackUrl=/studio/${studioName}-studio`) }
+   
+},[session,status])
+
+ const studioName = session?.user?.name;
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
@@ -70,7 +78,7 @@ export default  function StudioCheckList() {
          
             <div className="mb-12">
               <div className="relative max-w-md mx-auto">
-                <Input
+                <Input readOnly
                   placeholder={session?.user?.name || "Your Name"}
                   className="backdrop-blur-sm bg-white/40 border border-white/60 rounded-2xl h-14 px-6 text-lg placeholder:text-slate-500 focus:bg-white/60 focus:border-blue-200 focus:ring-2 focus:ring-blue-100 transition-all duration-300 pr-20"
                 />

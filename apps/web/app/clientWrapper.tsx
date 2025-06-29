@@ -8,7 +8,7 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
     <SessionProvider>
       <SocketProvider>
         {children}
-        <Toaster />
+        <Toaster position="top-right" />
       </SocketProvider>
     </SessionProvider>
   );

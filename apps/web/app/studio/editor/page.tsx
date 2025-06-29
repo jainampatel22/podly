@@ -59,9 +59,9 @@ const handleFrameClick = (frameIndex: number) => {
   }
 };
 
-  if (!session) {
-    redirect('/sign-in')
-  }
+
+   if (!session) { redirect(`/sign-in?callbackUrl=/studio/editor`) }
+  
 useEffect(() => {
   if (videoFile) {
     extractTimeLineFrame(videoFile, 1).then((frames) => {

@@ -26,8 +26,11 @@ import { useSession } from "next-auth/react";
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { redirect } from "next/navigation";
+import Link from "next/link";
 export default  function Meetings(){
    const {data:session} = useSession()
+    if (!session) { redirect(`/sign-in?callbackUrl=/explore/meetings`) }
     const [invites,setInvites] = useState<Invite[]>([])
     useEffect(() => {
       const fetchInvites = async () => {
@@ -97,9 +100,15 @@ export default  function Meetings(){
             </div>
           </div>
         </div>
-
-        {/* Meeting Cards */}
-        <div className="grid grid-cols-1 px-4 sm:px-6 lg:px-10 py-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {invites.length === 0 ? (
+<>
+<div>
+  <div className="italic text-black sm:ml-[35%] text-6xl  sm:mt-[3%]  to-blue-600 ">You have 0 <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600  bg-clip-text text-transparent">Invites</span>.</div>
+<Link href="/schedule"><div className=" text-slate-500  italic text-3xl ml-[40%] mt-[1%]">Go and schedule<span className="underline ml-1">now!</span> </div></Link>
+</div>
+</>  
+) : (
+    <div className="grid grid-cols-1 px-4 sm:px-6 lg:px-10 py-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {invites.map((invite) => (
             <Card key={invite.id} className="p-0 max-w-sm w-full shadow-none border-none hover:scale-105 transition-transform duration-300">
               <MagicCard
@@ -151,6 +160,11 @@ export default  function Meetings(){
             </Card>
           ))}
         </div>
+)}
+
+
+        {/* Meeting Cards */}
+      
       </div>
     </div>
         </>
