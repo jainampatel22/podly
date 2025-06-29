@@ -55,39 +55,30 @@ export default function Projects() {
    }, []);
 const downloadVideo = async (url: string, fileName: string) => {
   try {
-    const webmres = await fetch(url);
+    const response = await fetch(url);
 
-    if (!webmres.ok) {
-      throw new Error(`Failed to fetch video: ${webmres.statusText}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch video: ${response.statusText}`);
     }
 
-    const webmblob = await webmres.blob();
-    const formData = new FormData()
-    formData.append('video',webmblob)
-     const mp4Response = await fetch("/convert", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!mp4Response.ok) {
-      throw new Error("Conversion failed");
-    }
-    const mp4blob = await mp4Response.blob();
-    const mp4Url = URL.createObjectURL(mp4blob);
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
 
     const link = document.createElement("a");
-    link.href = mp4Url;
-    link.download = fileName;
+    link.href = blobUrl;
+    link.download = fileName; // e.g., "video.webm"
     document.body.appendChild(link);
     link.click();
 
     // Cleanup
     document.body.removeChild(link);
-    window.URL.revokeObjectURL(mp4Url);
+    URL.revokeObjectURL(blobUrl);
   } catch (err) {
     console.error("Error downloading video:", err);
   }
 };
+
+
 
   const filteredVideos = videos
     .map((video, index) => ({

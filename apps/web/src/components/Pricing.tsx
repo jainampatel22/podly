@@ -28,7 +28,7 @@ type PricingCardProps = {
 
 const PricingHeader = ({ title, subtitle }: { title: string; subtitle: string }) => (
   <section className="text-center pt-1">
-     <span className="ml-2 text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+     <span className="ml-2 text-3xl sm:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
         {title}
       </span>
     <p className="text-xl text-slate-500 italic pt-1">{subtitle}.</p>

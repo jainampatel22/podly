@@ -2,7 +2,7 @@ import { Socket } from "socket.io"
 import {v4 as UUIDv4} from 'uuid'
 import IRoomParams from "../interfaces/IRoomParams"
 
-// Store room data with peer info including usernames
+
 const rooms: Record<string, {peerId: string, username?: string, socketId: string}[]> = {}
 
 const roomHandler = (socket: Socket) => {
@@ -22,7 +22,7 @@ const roomHandler = (socket: Socket) => {
         if (rooms[roomId]) {
             console.log("new user has joined room ", roomId, "with peer id as", peerId)
             
-            // Add user to room
+          
             rooms[roomId].push({
                 peerId: peerId,
                 socketId: socket.id,
@@ -34,7 +34,7 @@ const roomHandler = (socket: Socket) => {
             currentPeerId = peerId;
             
             socket.on("ready", () => {
-                // Send existing users to new user
+            
                 const existingUsers = rooms[roomId]
                     .filter(user => user.peerId !== peerId)
                     .map(user => ({
@@ -44,7 +44,7 @@ const roomHandler = (socket: Socket) => {
                 
                 socket.emit('existing-users', existingUsers)
                 
-                // Notify others about new user
+                
                 socket.to(roomId).emit('user-joined', {peerId})
             })
         }
@@ -54,13 +54,13 @@ const roomHandler = (socket: Socket) => {
         console.log(`Username received: peerId=${peerId}, username=${username}, room=${currentRoom}`)
         
         if (currentRoom && rooms[currentRoom]) {
-            // Find and update the peer's username
+         
             const peer = rooms[currentRoom].find(p => p.peerId === peerId)
             if (peer) {
                 peer.username = username
                 console.log(`Updated username for peer ${peerId}: ${username}`)
                 
-                // Broadcast username to all other users in the room
+               
                 socket.to(currentRoom).emit('peer-username', { peerId, username })
                 console.log(`Broadcasting username to room ${currentRoom}`)
             } else {
@@ -82,16 +82,16 @@ const roomHandler = (socket: Socket) => {
         if (currentRoom && rooms[currentRoom] && currentPeerId) {
             console.log(`User disconnecting: peerId=${currentPeerId}, room=${currentRoom}`)
             
-            // Remove user from room
+   
             rooms[currentRoom] = rooms[currentRoom].filter(user => user.peerId !== currentPeerId)
             
-            // Notify other users
+
             socket.to(currentRoom).emit('user-left', {peerId: currentPeerId})
             console.log(`User ${currentPeerId} disconnected from room ${currentRoom}`)
         }
     }
 
-    // Register all event listeners
+ 
     socket.on("create-room", createRoom)
     socket.on("joined-room", joinedRoom)
     socket.on("username", handleUsername)
