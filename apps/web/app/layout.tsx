@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   siteName:"Podler",
   images:[
     {
-      url:'/og-image1.png',
+      url:'/new-og.png',
       width: 1200,
         height: 630,
         alt: "OG IMAGE",
