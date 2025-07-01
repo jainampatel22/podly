@@ -1,7 +1,12 @@
 'use client'
+type UserFleedPlayerProps = {
+  stream: MediaStream | null;
+  muted?: boolean;
+};
+
 import { useContext, useEffect, useRef } from "react"
 import { SocketContext } from "../../app/Context/SocketContext"
-export default function UserFleedPlayer({stream}:{stream:MediaStream}){
+export default function UserFleedPlayer({stream,muted=false}:UserFleedPlayerProps){
     
     const videoRef = useRef<HTMLVideoElement>(null)
     const {socket,totalParticipants} =useContext(SocketContext)
@@ -29,7 +34,7 @@ return (
         <video
     ref={videoRef} style={{transform:"scaleX(-1)"}}
     className={`object-cover ${getVideoClass()}`}
-    
+    muted={muted}
     autoPlay
   />
         

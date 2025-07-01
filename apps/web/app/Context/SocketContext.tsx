@@ -97,14 +97,18 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
             const call = user.call(peerId, localStream)
             console.log("calling the new peer", peerId)
             call.on('stream', (remoteStream) => {
-                dispatch(addPeerAction(peerId, remoteStream))
+                if (peerId !== myPeerId) {
+                    dispatch(addPeerAction(peerId, remoteStream))
+                }
             })
         }
 
         const handleCall = (call: any) => {
             call.answer(localStream)
             call.on('stream', (remoteStream: MediaStream) => {
-                dispatch(addPeerAction(call.peer, remoteStream))
+                if (call.peer !== myPeerId) {
+                    dispatch(addPeerAction(call.peer, remoteStream))
+                }
             })
         }
 

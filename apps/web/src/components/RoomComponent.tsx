@@ -50,7 +50,7 @@ export default function RoomComponent({ params }: RoomId) {
     const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
     const [recording, setRecording] = useState(false);
     const { data: session } = useSession()
-
+const [imageLoading, setImageLoading] = useState(false);
  
     const animationFrameRef = useRef<number | null>(null)
     const netRef = useRef<bodyPix.BodyPix | null>(null)
@@ -153,10 +153,11 @@ useEffect(() => {
 const loadBackgroundImages = async () => {
   if (!selectedImage) return null;
   try {
-    const exists = await debugImageExists(selectedImage);
-    if (!exists) throw new Error('Image does not exist');
+    if (!selectedImage.startsWith('data:')) {
+      const exists = await debugImageExists(selectedImage);
+      if (!exists) throw new Error('Image does not exist');
+    }
     const img = new Image();
-    img.crossOrigin = 'anonymous';
     const loadPromise = new Promise<void>((resolve, reject) => {
       img.onload = () => resolve();
       img.onerror = reject;
@@ -165,6 +166,7 @@ const loadBackgroundImages = async () => {
     img.src = selectedImage;
     await loadPromise;
     setBackgroundImage(img);
+    console.log('Custom background image set:', img.src);
     return img;
   } catch (error) {
     setBackgroundImage(null);
@@ -244,6 +246,10 @@ const loadBackgroundImages = async () => {
         
        
         const processed = canvas.captureStream(25); 
+        // Add audio track from the original stream if not already present
+        if (stream && stream.getAudioTracks().length > 0) {
+            processed.addTrack(stream.getAudioTracks()[0]);
+        }
         setProcessedStream(processed);
         setContextProcessedStream(processed);
         const processInterval = 1000 / 25; // 
@@ -423,7 +429,7 @@ const loadBackgroundImages = async () => {
             cancelAnimationFrame(animationFrameRef.current);
         }
     };
-}, [stream, backgroundType,backgroundEffectEnabled,selectedImage]);
+}, [stream, backgroundType, backgroundEffectEnabled, selectedImage]);
 
  
 
@@ -693,7 +699,7 @@ const loadBackgroundImages = async () => {
                     <span className="text-sm text-red-400 text-center px-4">{modelError}</span>
                     {stream && (
                         <div className="mt-2 w-full h-full">
-                            <UserFleedPlayer stream={stream} />
+                            <UserFleedPlayer stream={stream} muted={true} />
                         </div>
                     )}
                 </div>
@@ -713,11 +719,11 @@ const loadBackgroundImages = async () => {
         }
 
         if (processedStream) {
-            return <UserFleedPlayer stream={processedStream} />;
+            return <UserFleedPlayer stream={processedStream} muted={true} />;
         }
 
         if (stream) {
-            return <UserFleedPlayer stream={stream} />;
+            return <UserFleedPlayer stream={stream} muted={true} />;
         }
 
         return (
@@ -729,19 +735,38 @@ const loadBackgroundImages = async () => {
         );
     };
 const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    toast('❌ Failed uploading image. apply blur filter for now and then try for uploading image again.')
   const file = e.target.files?.[0];
   if (!file) return;
+
+  setImageLoading(true);
   const reader = new FileReader();
-  reader.onload = (event) => {
+  reader.onload = async (event) => {
     const url = event.target?.result as string;
     setCustomImage(url);
     setSelectedImage(url);
     setBackgroundType('image');
-    setBackgroundEffectEnabled(true);
-  };
-  reader.readAsDataURL(file);
 
+    // Load the image and enable the effect only after it's loaded
+    const img = new Image();
+    img.onload = () => {
+      setBackgroundImage(img);
+      setBackgroundEffectEnabled(true);
+      setImageLoading(false);
+      toast('✅ Custom background image uploaded successfully!');
+    };
+    img.onerror = () => {
+      setImageLoading(false);
+      toast('❌ Failed to load image. Please try again.');
+    };
+    img.src = url;
+  };
+
+  reader.onerror = () => {
+    setImageLoading(false);
+    toast('❌ Failed to load image. Please try again.');
+  };
+
+  reader.readAsDataURL(file);
 };
 
     return (
@@ -881,95 +906,68 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     <DialogHeader>
       <DialogTitle>Virtual Background Settings</DialogTitle>
       <DialogDescription>
-        Choose your preferred background effect for the video call.
+        Choose your preferred background image for the video call.
       </DialogDescription>
     </DialogHeader>
     <div className="grid gap-4 py-4">
       <div className="grid gap-3">
-        <Label htmlFor="background-type">Background Effect</Label>
+        <Label htmlFor="background-type">Background Image</Label>
         <div className="grid grid-cols-2 gap-3">
-          {/* Image Background Option */}
+          {/* Custom Image Upload Option */}
           <div 
             className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
-              backgroundType === 'image' 
+              backgroundType === 'image' && selectedImage === customImage
                 ? 'border-blue-500 bg-blue-50' 
                 : 'border-gray-200 hover:border-gray-300'
             }`}
-            onClick={() => setBackgroundType('image')}
-          >
-     <div className="flex flex-col items-center text-center">
-  <label
-    className={`w-32 h-24 flex flex-col items-center justify-center cursor-pointer rounded-xl border-2 transition-all duration-200
-      ${backgroundType === 'image' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}
-    `}
-    title="Upload custom background"
-  >
-    {customImage ? (
-      <img
-        src={customImage}
-        alt="Custom background"
-        className="w-32 h-24 object-cover rounded-lg"
-      />
-    ) : (
-      <>
-        <span className="text-3xl text-blue-400 mb-1">+</span>
-        <span className="text-xs text-gray-500">Upload</span>
-      </>
-    )}
-    <input
-      type="file"
-      accept="image/*"
-      className="hidden"
-      onChange={handleImageUpload}
-    />
-  </label>
-  <span className="text-sm font-medium mt-2">Custom Image</span>
-  <span className="text-xs text-gray-500 mt-1">Upload your own background</span>
-</div>
-          </div>
-
-          {/* Blur Background Option */}
-          <div 
-            className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
-              backgroundType === 'blur' 
-                ? 'border-blue-500 bg-blue-50' 
-                : 'border-gray-200 hover:border-gray-300'
-            }`}
-            onClick={() => {setBackgroundType('blur')
-                toast('✅ Blur effect added')
+            onClick={() => {
+              setBackgroundType('image');
+              if (customImage) {
+                setSelectedImage(customImage);
+                setBackgroundEffectEnabled(true);
+              }
             }}
           >
             <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-2">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium">Blur Effect</span>
-              <span className="text-xs text-gray-500 mt-1">Blur your background</span>
+              <label
+                className={`w-32 h-24 flex flex-col items-center justify-center cursor-pointer rounded-xl border-2 transition-all duration-200
+                  ${backgroundType === 'image' && selectedImage === customImage ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}
+                `}
+                title="Upload custom background"
+              >
+                {customImage ? (
+                  <img
+                    src={customImage}
+                    alt="Custom background"
+                    className="w-32 h-24 object-cover rounded-lg"
+                  />
+                ) : (
+                  <>
+                    <span className="text-3xl text-blue-400 mb-1">+</span>
+                    <span className="text-xs text-gray-500">Upload</span>
+                  </>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+              </label>
+              <span className="text-sm font-medium mt-2">Custom Image</span>
+              <span className="text-xs text-gray-500 mt-1">Upload your own background</span>
             </div>
           </div>
-       
         </div>
       </div>
-      
       {/* Preview Section */}
       <div className="grid gap-3">
         <Label>Preview</Label>
         <div className="h-20 bg-gray-100 rounded-lg flex items-center justify-center border">
-          {backgroundType === 'image' ? (
-            <div className="flex items-center gap-2 text-gray-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span className="text-sm">Custom Background Image</span>
-            </div>
+          {selectedImage ? (
+            <img src={selectedImage} alt="Preview" className="h-16 object-cover rounded" />
           ) : (
-            <div className="flex items-center gap-2 text-gray-600">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-200 to-cyan-200 rounded blur-sm"></div>
-              <span className="text-sm">Blurred Background</span>
-            </div>
+            <span className="text-sm text-gray-500">No background selected</span>
           )}
         </div>
       </div>
@@ -981,7 +979,12 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       <DialogClose asChild>
         <Button 
           type="button"
-        onClick={()=>setBackgroundEffectEnabled(true)}
+          onClick={() => {
+            if (backgroundType === 'image' && selectedImage) {
+              setBackgroundEffectEnabled(true);
+              toast('✅ Background effect applied!');
+            }
+          }}
           className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
         >
           Apply Background
