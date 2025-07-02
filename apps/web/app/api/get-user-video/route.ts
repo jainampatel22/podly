@@ -3,6 +3,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../../lib/authOptions";
+import { PrismaClient } from "@prisma/client";
 const s3 = new S3Client({
   region: process.env.AWS_REGION!,
   credentials: {
@@ -10,13 +11,15 @@ const s3 = new S3Client({
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
 });
+const prisma = new PrismaClient()
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-  const userName = session.user.name;
+  // if (!session?.user) {
+  //   return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  // }
+ 
+  const userName = session?.user?.name;
   const prefix = `vidoes/${userName}/`;
   try {
     const listCommand = new ListObjectsV2Command({

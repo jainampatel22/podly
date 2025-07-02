@@ -851,162 +851,157 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                 </div>
 
                 {/* Control Panel */}
-                <div className="flex-shrink-0 p-4 sm:p-6">
-                    <div className="backdrop-blur-sm bg-white/40 border border-white/60 rounded-3xl p-6 shadow-lg shadow-blue-100/50">
-                        <div className="flex items-center justify-center gap-4">
+                <div className="flex-shrink-0 w-full flex justify-center  items-center fixed bottom-6 left-1/2 -translate-x-1/2 z-30">
+                    <div className="flex gap-5 px-6 py-3 rounded-xl   ">
+                        <Button
+                            onClick={handleStartRecording}
+                            disabled={recording}
+                            className="flex items-center justify-center w-11 h-11 rounded-xl bg-white   hover:bg-gray-100 hover:scale-110 transition-all duration-150"
+                        >
+                            <Monitor className="w-5 h-5 text-gray-700" />
+                        </Button>
+                        {recording && (
                             <Button
-                                onClick={handleStartRecording}
-                                disabled={recording}
-                                className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-semibold px-8 py-4 rounded-2xl shadow-lg shadow-red-500/25 hover:shadow-xl hover:shadow-red-500/30 transition-all duration-300 hover:scale-105 group relative overflow-hidden"
+                                onClick={stopRecording}
+                                className="flex items-center justify-center w-11 h-11 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-100 transition-all duration-150"
                             >
-                                <span className="relative z-10 flex items-center gap-2">
-                                    <Monitor className="w-5 h-5" />
-                                    {recording ? "Recording..." : " Record"}
-                                </span>
-                                <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <span className="text-base font-bold text-gray-700">■</span>
                             </Button>
-
-                            {recording && (
-                                <Button
-                                    onClick={stopRecording}
-                                    className="bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold px-8 py-4 rounded-2xl shadow-lg shadow-yellow-500/25 hover:shadow-xl hover:shadow-yellow-500/30 transition-all duration-300 hover:scale-105 group relative overflow-hidden"
-                                >
-                                    <span className="relative z-10">Stop </span>
-                                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-600 to-orange-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        )}
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button className="flex items-center justify-center w-11 h-11 hover:scale-110 rounded-xl  bg-white text-white shadow-sm hover:bg-gray-100 transition-all duration-150">
+                                    <Sparkles className="w-5 h-5 text-gray-700  " />
                                 </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                    <DialogTitle>Virtual Background Settings</DialogTitle>
+                                    <DialogDescription>
+                                        Choose your preferred background image for the video call.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                    <div className="grid gap-3">
+                                        <Label htmlFor="background-type">Background Image</Label>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {/* Custom Image Upload Option */}
+                                            <div 
+                                                className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                                                    backgroundType === 'image' && selectedImage === customImage
+                                                        ? 'border-blue-500 bg-blue-50' 
+                                                        : 'border-gray-200 hover:border-gray-300'
+                                                }`}
+                                                onClick={() => {
+                                                    setBackgroundType('image');
+                                                    if (customImage) {
+                                                        setSelectedImage(customImage);
+                                                        setBackgroundEffectEnabled(true);
+                                                    }
+                                                }}
+                                            >
+                                                <div className="flex flex-col items-center text-center">
+                                                    <label
+                                                        className={`w-32 h-24 flex flex-col items-center justify-center cursor-pointer rounded-xl border-2 transition-all duration-200
+                                                            ${backgroundType === 'image' && selectedImage === customImage ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}
+                                                        `}
+                                                        title="Upload custom background"
+                                                    >
+                                                        {customImage ? (
+                                                            <img
+                                                                src={customImage}
+                                                                alt="Custom background"
+                                                                className="w-32 h-24 object-cover rounded-lg"
+                                                            />
+                                                        ) : (
+                                                            <>
+                                                                <span className="text-3xl text-blue-400 mb-1">+</span>
+                                                                <span className="text-xs text-gray-500">Upload</span>
+                                                            </>
+                                                        )}
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            className="hidden"
+                                                            onChange={handleImageUpload}
+                                                        />
+                                                    </label>
+                                                    <span className="text-sm font-medium mt-2">Custom Image</span>
+                                                    <span className="text-xs text-gray-500 mt-1">Upload your own background</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* Preview Section */}
+                                    <div className="grid gap-3">
+                                        <Label>Preview</Label>
+                                        <div className="h-20 bg-gray-100 rounded-lg flex items-center justify-center border">
+                                            {selectedImage ? (
+                                                <img src={selectedImage} alt="Preview" className="h-16 object-cover rounded" />
+                                            ) : (
+                                                <span className="text-sm text-gray-500">No background selected</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <DialogClose asChild>
+                                        <Button variant="outline">Cancel</Button>
+                                    </DialogClose>
+                                    <DialogClose asChild>
+                                        <Button 
+                                            type="button"
+                                            onClick={() => {
+                                                if (backgroundType === 'image' && selectedImage) {
+                                                    setBackgroundEffectEnabled(true);
+                                                    toast('✅ Background effect applied!');
+                                                }
+                                            }}
+                                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                                        >
+                                            Apply Background
+                                        </Button>
+                                    </DialogClose>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                        <Button
+                            className={`flex items-center hover:scale-110 justify-center w-11 h-11 rounded-xl border shadow-sm transition-all duration-150 ${
+                                isVideoOff
+                                    ? 'bg-gray-200 border-gray-300 text-gray-400'
+                                    : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'
+                            }`}
+                            onClick={toggleVideo}
+                        >
+                            {isVideoOff ? (
+                                <VideoOff className="w-5 h-5" />
+                            ) : (
+                                <Video className="w-5 h-5" />
                             )}
-  
-<Dialog>
-  <DialogTrigger asChild>
-    <Button className="backdrop-blur-sm pt-2 bg-white/20 hover:bg-white/30 border border-white/30 text-slate-700 hover:text-slate-900 font-medium rounded-2xl p-4 transition-all duration-300 hover:scale-105 shadow-lg">
-      <Sparkles size={24} />
-    </Button>
-  </DialogTrigger>
-  <DialogContent className="sm:max-w-[425px]">
-    <DialogHeader>
-      <DialogTitle>Virtual Background Settings</DialogTitle>
-      <DialogDescription>
-        Choose your preferred background image for the video call.
-      </DialogDescription>
-    </DialogHeader>
-    <div className="grid gap-4 py-4">
-      <div className="grid gap-3">
-        <Label htmlFor="background-type">Background Image</Label>
-        <div className="grid grid-cols-2 gap-3">
-          {/* Custom Image Upload Option */}
-          <div 
-            className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
-              backgroundType === 'image' && selectedImage === customImage
-                ? 'border-blue-500 bg-blue-50' 
-                : 'border-gray-200 hover:border-gray-300'
-            }`}
-            onClick={() => {
-              setBackgroundType('image');
-              if (customImage) {
-                setSelectedImage(customImage);
-                setBackgroundEffectEnabled(true);
-              }
-            }}
-          >
-            <div className="flex flex-col items-center text-center">
-              <label
-                className={`w-32 h-24 flex flex-col items-center justify-center cursor-pointer rounded-xl border-2 transition-all duration-200
-                  ${backgroundType === 'image' && selectedImage === customImage ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}
-                `}
-                title="Upload custom background"
-              >
-                {customImage ? (
-                  <img
-                    src={customImage}
-                    alt="Custom background"
-                    className="w-32 h-24 object-cover rounded-lg"
-                  />
-                ) : (
-                  <>
-                    <span className="text-3xl text-blue-400 mb-1">+</span>
-                    <span className="text-xs text-gray-500">Upload</span>
-                  </>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageUpload}
-                />
-              </label>
-              <span className="text-sm font-medium mt-2">Custom Image</span>
-              <span className="text-xs text-gray-500 mt-1">Upload your own background</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Preview Section */}
-      <div className="grid gap-3">
-        <Label>Preview</Label>
-        <div className="h-20 bg-gray-100 rounded-lg flex items-center justify-center border">
-          {selectedImage ? (
-            <img src={selectedImage} alt="Preview" className="h-16 object-cover rounded" />
-          ) : (
-            <span className="text-sm text-gray-500">No background selected</span>
-          )}
-        </div>
-      </div>
-    </div>
-    <DialogFooter>
-      <DialogClose asChild>
-        <Button variant="outline">Cancel</Button>
-      </DialogClose>
-      <DialogClose asChild>
-        <Button 
-          type="button"
-          onClick={() => {
-            if (backgroundType === 'image' && selectedImage) {
-              setBackgroundEffectEnabled(true);
-              toast('✅ Background effect applied!');
-            }
-          }}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-        >
-          Apply Background
-        </Button>
-      </DialogClose>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
-
-
-                            <Button
-                                className="backdrop-blur-sm  pt-2 bg-white/20 hover:bg-white/30 border border-white/30 text-slate-700 hover:text-slate-900 font-medium rounded-2xl p-4 transition-all   duration-300 hover:scale-105 shadow-lg"
-                                onClick={toggleVideo}
-                            >
-                                {isVideoOff ? (
-                                    
-                                    <VideoOff size={24} className="text-red-500" />
-                                ) : (
-                                    <Video size={24} />
-                                )}
-                            </Button>
-
-                            <Button
-                                className="backdrop-blur-sm pt-2 bg-white/20 hover:bg-white/30 border border-white/30 text-slate-700 hover:text-slate-900 font-medium rounded-2xl p-4 transition-all  duration-300 hover:scale-105 shadow-lg"
-                                onClick={toggleMute}
-                            >
-                                {isMuted ? (
-                                    <MicOff size={24} className="text-red-500" />
-                                ) : (
-                                    <Mic size={24} />
-                                )}
-                            </Button>
-
-                            <Button onClick={()=>{
-                                 {toast("Meeting has been ended ✅ ")}
-                                 router.push(`/studio/${session.user?.name}-studio`)
-                            }} className="backdrop-blur-sm bg-white/20 hover:bg-red-500/20 border border-white/30 hover:border-red-500/30 text-slate-700 hover:text-red-500 font-medium  rounded-2xl p-4 transition-all duration-300 hover:scale-105 shadow-lg">
-                              
-                            <PhoneOff size={24} />
-                               
-                            </Button>
-                        </div>
+                        </Button>
+                        <Button
+                            className={`flex hover:scale-110 items-center justify-center w-11 h-11 rounded-xl border shadow-sm transition-all duration-150 ${
+                                isMuted
+                                    ? 'bg-gray-200 border-gray-300 text-gray-400'
+                                    : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'
+                            }`}
+                            onClick={toggleMute}
+                        >
+                            {isMuted ? (
+                                <MicOff className="w-5 h-5" />
+                            ) : (
+                                <Mic className="w-5 h-5" />
+                            )}
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                toast("Meeting has been ended ✅ ");
+                                router.push(`/studio/${session.user?.name}-studio`);
+                            }}
+                            className="flex hover:scale-110 items-center justify-center w-11 h-11 rounded-xl bg-white border border-gray-200 shadow-sm hover:bg-red-50 hover:border-red-300 transition-all duration-150"
+                        >
+                            <PhoneOff className="w-5 h-5 text-red-500" />
+                        </Button>
                     </div>
                 </div>
             </div>
