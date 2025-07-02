@@ -56,12 +56,11 @@ const PricingCard = ({ isYearly, isSelected,href, title, monthlyPrice, yearlyPri
  const handleTest=async()=>{
  try {
     const price = isYearly ? yearlyPrice : monthlyPrice;
-
-    if (!price) {
-      alert("Invalid price");
-      return;
+    if(title=='Basic'){
+      router.push('/')
+      
     }
-
+    if(!price) return 
     const res = await axios.post("https://podly-h9la.onrender.com/create-order", {
       amount: price * 100, 
       currency: "INR",
@@ -123,14 +122,14 @@ const PricingCard = ({ isYearly, isSelected,href, title, monthlyPrice, yearlyPri
               className={cn("px-2.5 rounded-xl h-fit text-sm py-1 bg-zinc-200 text-black dark:bg-zinc-800 dark:text-white", {
                 "bg-gradient-to-r from-orange-400 to-rose-400 dark:text-black ": popular,
               })}>
-              Save ${monthlyPrice * 12 - yearlyPrice}
+              Save ₹{monthlyPrice * 12 - yearlyPrice}
             </div>
           </div>
         ) : (
           <CardTitle className="text-zinc-700 dark:text-zinc-300 text-lg">{title}</CardTitle>
         )}
         <div className="flex gap-0.5">
-          <h3 className="text-3xl font-bold">{yearlyPrice && isYearly ? "$" + yearlyPrice : monthlyPrice ? "₹" + monthlyPrice : "Custom"}</h3>
+          <h3 className="text-3xl font-bold">{yearlyPrice && isYearly ? "₹" + yearlyPrice : monthlyPrice ? "₹" + monthlyPrice : "Free"}</h3>
           <span className="flex flex-col justify-end text-sm mb-1">{yearlyPrice && isYearly ? "/year" : monthlyPrice ? "/month" : null}</span>
         </div>
         <CardDescription className="pt-1.5 h-12">{description}</CardDescription>
@@ -165,24 +164,33 @@ const CheckItem = ({ text }: { text: string }) => (
 export default function Pricing(){
     const [isselected,setIsSelected] = useState("Basic")
     const plans = [
-    {
+       {
       title: "Basic",
-      monthlyPrice: 199,
-      yearlyPrice: 40,
-      description: "Essential features you need to get started",
-      features: ["Virtual Backgrounds", "Video transcription", "Live captions"],
+      monthlyPrice: 0,
+      yearlyPrice: 0,
+      description: "Everything will be limited to 15 minutes of total usage per day",
+      features: ["Video Calling", "schedule meetings","Pro version for 5 minutes"],
       actionLabel: "Get Started",
-      href:'/basic'
+      href:'/sign-in'
     },
     {
       title: "Pro",
-      monthlyPrice: 499,
-      yearlyPrice: 89,
-      description: "Perfect for owners of small & medium businessess",
-      features: ["Basic Features", "Live call Transcription", "Editor Pro"],
+      monthlyPrice: 199,
+      yearlyPrice: 2000,
+      description: "Everything will be limited to 30 minutes of total usage per day",
+      features: [ "Editor", "captions in video","Enable Virtual Backgrounds"],
       actionLabel: "Get Started",
+      href:'/pro'
+    },
+    {
+      title: "Pro ++",
+      monthlyPrice: 499,
+      yearlyPrice: 4500,
+      description: "You can clock unlimited hours.",
+      features: ["pre build virtual backgrounds", "Live call Transcription", "Editor Pro"],
+      actionLabel: "Under Development",
       popular: true,
-      href:"pro"
+      href:"/pro++"
     },
   
   ]
