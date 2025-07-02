@@ -6,7 +6,7 @@ import { SocketContext } from "../../app/Context/SocketContext"
 import UserFleedPlayer from "@/components/UserFleedPlayer"
 import Link from "next/link"
 import { AuthOptions } from "next-auth"
-import { Mic, MicOff, Video, PhoneOff, VideoOff, Monitor, Sparkles, Users } from 'lucide-react';
+import { Mic, MicOff, Video, PhoneOff, VideoOff, Monitor, Sparkles, Users, User } from 'lucide-react';
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { getServerSession } from "next-auth"
@@ -26,6 +26,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
+import LocalFeedPlayer from "./LocalFeedPlayer"
 type RoomId = {
     params: string
 }
@@ -433,28 +434,7 @@ const loadBackgroundImages = async () => {
 
  
 
-    // Debug logs
-    // useEffect(() => {
-    //     console.log('🎨 Background state:', {
-    //         backgroundType,
-    //         imageLoaded: !!backgroundImage,
-    //         imageComplete: backgroundImage?.complete,
-    //         imageDimensions: backgroundImage ? `${backgroundImage.naturalWidth}x${backgroundImage.naturalHeight}` : 'N/A',
-    //         imageSrc: backgroundImage?.src
-    //     });
-    // }, [backgroundType, backgroundImage]);
-
-    // useEffect(() => {
-    //     // console.log('📊 Component state:', {
-    //     //     stream: !!stream,
-    //     //     processedStream: !!processedStream,
-    //     //     modelLoaded,
-    //     //     modelError,
-    //     //     isVideoOff,
-    //     //     backgroundType
-    //     });
-    // }, [stream, processedStream, modelLoaded, modelError, isVideoOff, backgroundType]);
-
+    
     if (!session) {
         redirect(`/sign-in?callbackUrl=/room/${params}`)
     }
@@ -681,7 +661,7 @@ const loadBackgroundImages = async () => {
 
     const renderVideoContent = () => {
         if(!backgroundEffectEnabled && stream ){
-            return <UserFleedPlayer stream={stream} />;
+            return <UserFleedPlayer stream={stream} muted={true} />;
         }
         if (isVideoOff) {
             return (
@@ -699,7 +679,7 @@ const loadBackgroundImages = async () => {
                     <span className="text-sm text-red-400 text-center px-4">{modelError}</span>
                     {stream && (
                         <div className="mt-2 w-full h-full">
-                            <UserFleedPlayer stream={stream} muted={true} />
+                            <UserFleedPlayer stream={stream} muted={true}  />
                         </div>
                     )}
                 </div>
@@ -719,7 +699,7 @@ const loadBackgroundImages = async () => {
         }
 
         if (processedStream) {
-            return <UserFleedPlayer stream={processedStream} muted={true} />;
+            return <UserFleedPlayer stream={processedStream} muted={true}/>;
         }
 
         if (stream) {
@@ -854,7 +834,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                         </div>
 
                         {/* Other users placeholder */}
-                        {Object.keys(peers).map((peerId) => (
+                        {Object.keys(peers).filter(peerId => peerId!== myPeerId).map((peerId) => (
                             <div
                                 key={peerId}
                                 className={`backdrop-blur-sm bg-white/20 border border-white/30 rounded-3xl relative overflow-hidden shadow-lg shadow-blue-100/50 flex items-center justify-center ${getVideoClass()}`}

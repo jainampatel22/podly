@@ -6,7 +6,7 @@ type UserFleedPlayerProps = {
 
 import { useContext, useEffect, useRef } from "react"
 import { SocketContext } from "../../app/Context/SocketContext"
-export default function UserFleedPlayer({stream, muted = false}: UserFleedPlayerProps){
+export default function LocalFeedPlayer({stream}:UserFleedPlayerProps){
     
     const videoRef = useRef<HTMLVideoElement>(null)
     const {socket,totalParticipants} =useContext(SocketContext)
@@ -27,6 +27,9 @@ export default function UserFleedPlayer({stream, muted = false}: UserFleedPlayer
                 return 'h-[40vh] sm:h-[45vh] md:h-[50vh] lg:h-[55vh] xl:h-[60vh]'
         }
     }
+
+    console.log("Rendering video", { stream });
+
 return (
     <>
    <div className="rounded-xl overflow-hidden" >
@@ -34,7 +37,7 @@ return (
         <video
     ref={videoRef} style={{transform:"scaleX(-1)"}}
     className={`object-cover ${getVideoClass()}`}
-    muted={muted}
+    muted
     autoPlay
   />
         

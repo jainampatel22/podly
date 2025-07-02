@@ -104,13 +104,14 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
         }
 
         const handleCall = (call: any) => {
-            call.answer(localStream)
-            call.on('stream', (remoteStream: MediaStream) => {
-                if (call.peer !== myPeerId) {
-                    dispatch(addPeerAction(call.peer, remoteStream))
-                }
-            })
+    call.answer(localStream)
+    call.on('stream', (remoteStream: MediaStream) => {
+       
+        if (call.peer !== myPeerId) {
+            dispatch(addPeerAction(call.peer, remoteStream))
         }
+    })
+}
 
         const handleVideoToggle = ({peerId, isVideoOff}: {peerId: string, isVideoOff: boolean}) => {
             dispatch({
