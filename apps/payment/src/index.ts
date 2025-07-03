@@ -6,7 +6,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 const app = express()
 app.use(cors({
-  origin:['https://podly-web.vercel.app','http://localhost:3000']
+  origin:['https://podler.space','http://localhost:3000']
 }));
 app.use(express.json())
 
