@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  
 }
 
 datasource db {
@@ -14,30 +7,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Invitation {
-  id          String   @id @default(uuid())
-  senderName  String
-  reciverName String
-  date        DateTime
-  time        String
-  subject     String
-  email       String
-  status      String  @default("pending")
-  createdAt   DateTime @default(now())
-}
-
 model User {
-  id             String    @id @default(cuid())
-  name           String?
-  email          String?   @unique
-  emailVerified  DateTime?
-  image          String?
-  accounts       Account[]
-  sessions       Session[]
+  id                      String              @id @default(cuid())
+  name                    String?
+  email                   String?             @unique
+  emailVerified           DateTime?
+  image                   String?
+  accounts                Account[]
+  sessions                Session[]
+  subscription            UserSubscription    @default(FREE)
+  subscriptionUpdatedAt   DateTime?
+  subscriptionLogs        SubscriptionLog[]
+  invitations             Invitation[]
+  createdAt               DateTime            @default(now())
 }
 
 model Account {
-  id                 String  @id @default(cuid())
+  id                 String   @id @default(cuid())
   userId             String
   type               String
   provider           String
@@ -49,7 +35,8 @@ model Account {
   scope              String?
   id_token           String?
   session_state      String?
-  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([provider, providerAccountId])
 }
 
@@ -65,5 +52,35 @@ model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
+
   @@unique([identifier, token])
+}
+
+model Invitation {
+  id          String   @id @default(uuid())
+  senderName  String
+  reciverName String
+  date        DateTime
+  time        String
+  subject     String
+  email       String
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  user        User?    @relation(fields: [email], references: [email])
+}
+
+model SubscriptionLog {
+  id         String           @id @default(cuid())
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  type       UserSubscription
+  razorpayId String
+  amount     Int
+  createdAt  DateTime         @default(now())
+}
+
+enum UserSubscription {
+  FREE
+  PRO
+  PROPlus
 }

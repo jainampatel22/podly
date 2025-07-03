@@ -88,7 +88,7 @@ const PricingCard = ({ isYearly, isSelected,href, title, monthlyPrice, yearlyPri
                 user_id:session?.user?.name,
                 plan_name:title,
                 billing_cycle:isYearly?"Yearly":"Monthly",
-                
+                 subscriptionType: title,
                 description:description
               },
               theme:{
@@ -183,7 +183,7 @@ export default function Pricing(){
       href:'/pro'
     },
     {
-      title: "Pro ++",
+      title: "Pro++",
       monthlyPrice: 499,
       yearlyPrice: 4500,
       description: "You can clock unlimited hours.",
