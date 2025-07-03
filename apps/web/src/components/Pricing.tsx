@@ -165,7 +165,7 @@ export default function Pricing(){
     const [isselected,setIsSelected] = useState("Basic")
     const plans = [
        {
-      title: "Basic",
+      title: "Free",
       monthlyPrice: 0,
       yearlyPrice: 0,
       description: "Everything will be limited to 15 minutes of total usage per day",
@@ -183,7 +183,7 @@ export default function Pricing(){
       href:'/pro'
     },
     {
-      title: "Pro++",
+      title: "ProPlus",
       monthlyPrice: 499,
       yearlyPrice: 4500,
       description: "You can clock unlimited hours.",
