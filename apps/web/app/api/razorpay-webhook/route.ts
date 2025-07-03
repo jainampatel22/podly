@@ -30,25 +30,28 @@ export async function POST(req: NextRequest) {
     }
 
     const subscriptionType = rawType as UserSubscription;
-if (!email) {
-  console.error('❌ No email found in Razorpay payload.');
-  return new Response(JSON.stringify({ success: false, error: 'Missing email in payment' }), { status: 400 });
-}
+    if (!email) {
+      console.error('❌ No email found in Razorpay payload.');
+      return new Response(JSON.stringify({ success: false, error: 'Missing email in payment' }), { status: 400 });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      console.error('❌ User not found for email:', email);
+      return new Response(JSON.stringify({ success: false, error: 'User not found' }), { status: 400 });
+    }
 
     try {
-
       console.log('🔔 Payment event received:', {
-  email,
-  subscriptionType: rawType,
-  paymentId: eventData.payload.payment.entity.id,
-});
-
+        email,
+        subscriptionType: rawType,
+        paymentId: eventData.payload.payment.entity.id,
+      });
 
       await prisma.user.update({
         where: { email },
         data: {
           subscription: subscriptionType,
-        
         },
       });
 
