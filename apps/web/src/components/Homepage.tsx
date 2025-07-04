@@ -9,6 +9,7 @@ import { signOut, useSession } from "next-auth/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import HomeComponent from "@/components/HomeComponent";
+import Link from "next/link";
 
 export default function Index() {
   const [contentType, setContentType] = useState("");
@@ -73,6 +74,13 @@ const { data: sessionData, status } = useSession();
       </div>
 
       {/* Header */}
+     <div className="w-full flex justify-center md:-mb-5">
+  <div className="w-full max-w-xl mx-auto rounded-b-2xl shadow-lg p-2 md:p-3 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600">
+    <div className="text-center text-lg md:text-xl font-semibold text-white tracking-wide drop-shadow-lg">
+      Hurray! Get 3 days of Pro access for free 😍 <Link href="https://x.com/Jainam___patel/" className="underline font-light font-slate-500" target="_blank">Dm me.</Link>
+    </div>
+  </div>
+</div>
       <header className="relative z-10 px-4 sm:px-6 lg:px-8 pt-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">

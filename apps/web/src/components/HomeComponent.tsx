@@ -42,7 +42,7 @@ export default function HomeComponent(){
         {/* Main CTA Button */}
         <div className="flex justify-center items-center mb-8 sm:mb-10 lg:mb-12 w-full max-w-sm sm:max-w-none px-4 sm:px-0">
           <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
-            text-white font-semibold text-base xs:text-lg sm:text-xl px-6 xs:px-8 sm:px-10 py-3 xs:py-4 sm:py-5 
+            text-white font-semibold text-base xs:text-lg sm:text-xl px-6 xs:px-8 sm:px-5 py-3 xs:py-4 sm:py-5 
             rounded-xl sm:rounded-2xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30
             transition-all duration-300 hover:scale-105 group relative overflow-hidden w-full sm:w-auto
             min-h-[48px] xs:min-h-[56px] sm:min-h-[64px]">
