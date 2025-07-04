@@ -56,10 +56,15 @@ const PricingCard = ({ isYearly, isSelected,href, title, monthlyPrice, yearlyPri
  const handleTest=async()=>{
  try {
     const price = isYearly ? yearlyPrice : monthlyPrice;
-    if(title=='Basic'){
+    if(title=='Free'){
       router.push('/')
       
     }
+if(title =='PROPlus'){
+  toast('this model is under development right now.')
+
+}
+
     if(!price) return 
     const res = await axios.post("https://podly-h9la.onrender.com/create-order", {
       amount: price * 100, 
@@ -67,6 +72,7 @@ const PricingCard = ({ isYearly, isSelected,href, title, monthlyPrice, yearlyPri
       receipt: `receipt_${Date.now()}`,
       
     });
+
             
    const order= await res.data
      if (typeof window === "undefined" || !(window as any).Razorpay) {
@@ -81,8 +87,18 @@ const PricingCard = ({ isYearly, isSelected,href, title, monthlyPrice, yearlyPri
               title:title,
               description:description,
               order_id:order.id,
-              handler:function (response:any){
+              handler: async function (response:any){
                 alert("payment succesfull! payment id"+response.razorpay_payment_id)
+                try {
+              const subscription = await axios.post('/api/add-user-subscription',{
+              email:session?.user?.email,
+              plan:title
+            })
+           toast.success("Subscription updated!");
+            } catch (error) {
+                   console.log(error)
+                   alert('payment failed')
+            }
               },
               notes:{
                 user_id:session?.user?.name,
@@ -97,6 +113,7 @@ const PricingCard = ({ isYearly, isSelected,href, title, monthlyPrice, yearlyPri
             }
             const rzp = new(window as any). Razorpay(options);
     rzp.open();
+            
 
         } catch (error) {
               console.error('Payment error:', error);
@@ -140,17 +157,17 @@ const PricingCard = ({ isYearly, isSelected,href, title, monthlyPrice, yearlyPri
         ))}
       </CardContent>
     </div>
-    <CardFooter className="mt-2">
-      <Button onClick={()=>{
-        toast('Premium features are still in development, but you’re welcome to buy early if you’d like to support us. 😊')
-        handleTest()
-      }} 
-      
-      className="relative inline-flex w-full items-center justify-center rounded-md bg-black text-white dark:bg-white px-6 font-medium  dark:text-black transition-colors focus:outline-none ">
-        <div  className="absolute -inset-0.5 -z-10 rounded-lg bg-gradient-to-b from-[#c7d2fe] to-[#8678f9] opacity-75 blur" />
-        {actionLabel}
-      </Button>
-    </CardFooter>
+   <CardFooter className="mt-2">
+    <Button
+      onClick={() => {
+        title === 'PROPlus' ? toast("features under development") : handleTest(); // do nothing or handle differently
+      }}
+      className="relative inline-flex w-full items-center justify-center rounded-md bg-black text-white dark:bg-white px-6 font-medium dark:text-black transition-colors focus:outline-none"
+    >
+      <div className="absolute -inset-0.5 -z-10 rounded-lg bg-gradient-to-b from-[#c7d2fe] to-[#8678f9] opacity-75 blur" />
+      {actionLabel}
+    </Button>
+  </CardFooter>
   </Card>
 )
 }
@@ -168,27 +185,27 @@ export default function Pricing(){
       title: "Free",
       monthlyPrice: 0,
       yearlyPrice: 0,
-      description: "Everything will be limited to 15 minutes of total usage per day",
-      features: ["Video Calling", "schedule meetings","Pro version for 5 minutes"],
+      description: "Everything will be limited to 15 minutes of total usage per day.",
+      features: ["Video Calling", "schedule meetings","Basic Editor"],
       actionLabel: "Get Started",
       href:'/sign-in'
     },
     {
-      title: "Pro",
+      title: "PRO",
       monthlyPrice: 199,
       yearlyPrice: 2000,
-      description: "Everything will be limited to 30 minutes of total usage per day",
-      features: [ "Editor", "captions in video","Enable Virtual Backgrounds"],
+      description: "Everything will be limited to 30 minutes of total usage per day.",
+      features: [ "Editor with smart features", "captions in video","Enable Virtual Backgrounds"],
       actionLabel: "Get Started",
       href:'/pro'
     },
     {
-      title: "ProPlus",
+      title: "PROPlus",
       monthlyPrice: 499,
       yearlyPrice: 4500,
       description: "You can clock unlimited hours.",
       features: ["pre build virtual backgrounds", "Live call Transcription", "Editor Pro"],
-      actionLabel: "Under Development",
+      actionLabel: "Get Started",
       popular: true,
       href:"/pro++"
     },

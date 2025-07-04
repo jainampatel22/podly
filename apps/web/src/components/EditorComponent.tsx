@@ -18,7 +18,8 @@ export default function EditorComponent() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [start, setStart] = useState('0');
   const [duration, setDuration] = useState('5');
-  
+  const [premiumUser,setPremiumUser]=useState(false)
+  const [allowed,setAllowed]=useState(true)
 const[showTextInput,setShowTextInput]=useState(false)
   const [showTrimInputs, setShowTrimInputs] = useState(false);
   const [showScaleInput,setShowScaleInput]=useState(false)
@@ -28,7 +29,7 @@ const[showTextInput,setShowTextInput]=useState(false)
   const [grayScale,setGrayScale]=useState(false)
   const {data:session}=useSession()
   const [processing,setProcessing]=useState(false)
-    const [width,setWidth]=useState('')
+  const [width,setWidth]=useState('')
     const [caption,setCaption]=useState(false)
     const  [height,setHeight]=useState('')
     const videoRef = useRef<HTMLVideoElement>(null)
@@ -61,6 +62,63 @@ const handleFrameClick = (frameIndex: number) => {
 
 
    if (!session) { redirect(`/sign-in?callbackUrl=/studio/editor`) }
+useEffect(() => {
+  const checkUser = async () => {
+    try {
+      const user = session?.user?.name;
+
+      if (!user) return; 
+
+      const res = await axios.post('/api/check-premium-user', { name: user });
+
+      setPremiumUser(res.data === true);
+    } catch (error) {
+      console.error("Failed to check premium status", error);
+      setPremiumUser(false); 
+    }
+  };
+
+  checkUser();
+}, [session]);
+useEffect(() => {
+  const interval = setInterval(async () => {
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const localDate = new Date().toLocaleDateString("en-CA", { timeZone });
+
+    try {
+      await axios.post('/api/log-usage', {
+        localDate,
+        feature: '/studio/editor',
+        seconds: 30,
+        timeZone,
+      }, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } catch (err) {
+      console.error('Log usage failed:', err);
+    }
+  }, 30000); 
+
+  return () => clearInterval(interval);
+}, []);
+
+useEffect(() => {
+  const interval = setInterval(async () => {
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const localDate = new Date().toLocaleDateString("en-CA", { timeZone });
+
+    const res = await axios.get(`/api/log-usage?feature=/studio/editor&localDate=${localDate}`);
+    if (!res.data.allowed) {
+      alert('Time limit reached');
+      router.push('/');
+    }
+  }, 5000); 
+
+  return () => clearInterval(interval);
+}, []);
+
+
+
   
 useEffect(() => {
   if (videoFile) {
@@ -284,7 +342,7 @@ document.body.removeChild(a)
         setShowTextInput(false)
         setShowTrimInputs((prev) => !prev)}} >Trim</h1>
       
-      <h1 className='-mt-2'>✂️</h1>
+      <h1 className=''>✂️</h1>
       
     </div>
    
@@ -319,9 +377,17 @@ document.body.removeChild(a)
           </div>
         )}
        
-    
+     <div className="flex mt-3 ml-4 items-center gap-3 text-white">
+      <h1 className="text-2xl  font-semibold cursor-pointer" onClick={()=>{
+        toast("Premium subscription is required")
+      }} >Merge</h1>
+      
+      <h1 className='-mt-2'>✂️</h1>
+      
+    </div>
 
-        <div className="flex items-center gap-3 text-white">
+        {
+          premiumUser ?(<div className="flex items-center gap-3 text-white">
       <h1 className="text-2xl ml-4 mt-7 font-semibold cursor-pointer" onClick={() =>{
         setShowTrimInputs(false)
         setShowTextInput((prev) => !prev)
@@ -329,7 +395,15 @@ document.body.removeChild(a)
         } } >Text</h1>
      <h1 className='mt-7'>💬</h1>
     </div>
-    
+    ):(<div className="flex items-center gap-3 text-white">
+      <h1 className="text-2xl ml-4 mt-7 font-semibold cursor-pointer" onClick={() =>{
+        toast("premium subscription is required")
+        
+        } } >Text</h1>
+     <h1 className='mt-7'>💬</h1>
+    </div>
+    )
+        }
    
     {
       showTextInput && (
@@ -377,7 +451,7 @@ document.body.removeChild(a)
 
      <div className="flex items-center gap-3 text-white">
     <h1
-  className="text-xl mt-7 ml-4  font-semibold cursor-pointer"
+  className="text-2xl mt-7 ml-4 font-semibold cursor-pointer"
   onClick={() => {
     const newValue = !grayScale; // compute next state
     setGrayScale(newValue);
@@ -420,7 +494,8 @@ document.body.removeChild(a)
       )
     }
 
-    <div className="flex items-center gap-3 text-white">
+   {
+    premiumUser ? ( <div className="flex items-center gap-3 text-white">
     <h1
   className="text-xl mt-7 ml-4 font-semibold cursor-pointer"
   onClick={() => {
@@ -436,7 +511,22 @@ document.body.removeChild(a)
 </h1>
 <h1 className="mt-7">🔴</h1>
 
+    </div>):(
+       <div className="flex items-center gap-3 text-white">
+    <h1
+  className="text-xl mt-7 ml-4 font-semibold cursor-pointer"
+  onClick={() => {
+    
+    toast("Premium subscription is required")
+  }}
+>
+  Live Captions
+</h1>
+<h1 className="mt-7">🔴</h1>
+
     </div>
+    )
+   }
 
      <div className="flex items-center gap-3 text-white">
     <h1

@@ -79,6 +79,19 @@ model SubscriptionLog {
   createdAt  DateTime         @default(now())
 }
 
+model usage_logs{
+    id String @id @default(cuid())
+    userName  String
+    feature String
+    date  DateTime
+    durationSeconds  Int @default(0)
+    timeZone  String?
+    createdAt   DateTime  @default(now())
+    updatedAt    DateTime @updatedAt
+    @@unique([userName,date,feature])
+    @@index([userName,date,feature])
+} 
+
 enum UserSubscription {
   FREE
   PRO

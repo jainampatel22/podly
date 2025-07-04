@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import LocalFeedPlayer from "./LocalFeedPlayer"
+import axios from "axios"
 type RoomId = {
     params: string
 }
@@ -50,6 +51,7 @@ export default function RoomComponent({ params }: RoomId) {
     const [isVideoOff, setIsVideoOff] = useState(false)
     const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
     const [recording, setRecording] = useState(false);
+    const [premiumUser,setPremiumUser]=useState(false)
     const { data: session } = useSession()
 const [imageLoading, setImageLoading] = useState(false);
  
@@ -63,6 +65,61 @@ const [imageLoading, setImageLoading] = useState(false);
 ];
 const [selectedImage, setSelectedImage] = useState<string | null>(null);
 const [customImage, setCustomImage] = useState<string | null>(null);
+
+useEffect(() => {
+  const interval = setInterval(async () => {
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const localDate = new Date().toLocaleDateString("en-CA", { timeZone });
+
+    try {
+      await axios.post('/api/log-usage', {
+        localDate,
+        feature: '/studio/room',
+        seconds: 10,
+        timeZone,
+      }, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } catch (err) {
+      console.error('Log usage failed:', err);
+    }
+  }, 10000); 
+
+  return () => clearInterval(interval);
+}, []);
+useEffect(() => {
+  const checkUser = async () => {
+    try {
+      const user = session?.user?.name;
+
+      if (!user) return; 
+
+      const res = await axios.post('/api/check-premium-user', { name: user });
+
+      setPremiumUser(res.data === true);
+    } catch (error) {
+      console.error("Failed to check premium status", error);
+      setPremiumUser(false); 
+    }
+  };
+
+  checkUser();
+}, [session]);
+
+useEffect(() => {
+  const interval = setInterval(async () => {
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const localDate = new Date().toLocaleDateString("en-CA", { timeZone });
+
+    const res = await axios.get(`/api/log-usage?feature=/studio/room&localDate=${localDate}`);
+    if (!res.data.allowed) {
+      alert('Time limit reached');
+      router.push('/');
+    }
+  }, 5000); 
+
+  return () => clearInterval(interval);
+}, []);
 
 
 const debugImageExists = async (imagePath: string) => {
@@ -868,7 +925,8 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                                 <span className="text-base font-bold text-gray-700">■</span>
                             </Button>
                         )}
-                        <Dialog>
+                       {
+                        premiumUser?( <Dialog>
                             <DialogTrigger asChild>
                                 <Button className="flex items-center justify-center w-11 h-11 hover:scale-110 rounded-xl  bg-white text-white shadow-sm hover:bg-gray-100 transition-all duration-150">
                                     <Sparkles className="w-5 h-5 text-gray-700  " />
@@ -964,7 +1022,12 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                                     </DialogClose>
                                 </DialogFooter>
                             </DialogContent>
-                        </Dialog>
+                        </Dialog>):(
+                            <Button onClick={()=>toast('requires premium version')} className="flex items-center justify-center w-11 h-11 hover:scale-110 rounded-xl  bg-white text-white shadow-sm hover:bg-gray-100 transition-all duration-150">
+                                    <Sparkles className="w-5 h-5 text-gray-700  " />
+                                </Button>
+                        )
+                       }
                         <Button
                             className={`flex items-center hover:scale-110 justify-center w-11 h-11 rounded-xl border shadow-sm transition-all duration-150 ${
                                 isVideoOff
