@@ -11,9 +11,10 @@ useDropzone, } from '@/components/ui/dropzone';
 import { redirect, useRouter } from 'next/navigation';
 
   import { useSession } from 'next-auth/react';
-import { CloudUpload, CloudUploadIcon, Pause, Play, Scissors, Sparkles } from 'lucide-react';
+import { CloudUpload, CloudUploadIcon, Monitor, Pause, Play, Scissors, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
+import { Button } from './ui/button';
 export default function EditorComponent() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [start, setStart] = useState('0');
@@ -311,8 +312,8 @@ document.body.removeChild(a)
 }
   return (
   <>
-  <div className="min-h-screen bg-black relative overflow-hidden">
-      <div className="hidden md:block relative z-10">
+  <div className="min-h-screen  relative overflow-hidden">
+      <div className="hidden bg-black md:block relative z-10">
         <header className="px-4 sm:px-6 lg:px-8 pt-6">
           <div className="max-w-7xl mx-auto">
             <div className="backdrop-blur-sm bg-black/60 border border-white/20 rounded-2xl px-6 py-4 flex items-center space-x-4 shadow-lg">
@@ -673,6 +674,46 @@ document.body.removeChild(a)
 </div>
 
 </div>
+      <div className="md:hidden relative z-10 min-h-screen flex flex-col">
+      
+        <header className="backdrop-blur-sm bg-white/40 border-b border-white/60">
+          <div className="px-4 py-4 flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Podler
+            </h1>
+            <div className="w-px h-6 bg-slate-300"></div>
+            <h2 className="text-slate-700 text-sm font-medium truncate">
+              {session?.user?.name}'s Studio
+            </h2>
+          </div>
+        </header>
+
+      
+        <div className="flex-1 flex flex-col justify-center items-center text-center px-6">
+          <div className="backdrop-blur-sm bg-white/40 border border-white/60 rounded-3xl p-8 max-w-sm">
+            <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Monitor className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-4">
+              Desktop Required
+            </h1>
+            <p className="text-slate-600 text-lg leading-relaxed">
+              Studio access requires a desktop device for the best experience.
+            </p>
+            <div className="mt-6">
+              <Button 
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-blue-500/25 transition-all duration-300"
+                onClick={() => window.location.href = '/'}
+              >
+                Back to Home
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
   </div>
     </>
   );
