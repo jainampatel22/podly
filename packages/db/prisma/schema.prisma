@@ -16,7 +16,10 @@ model User {
   accounts                Account[]
   sessions                Session[]
   subscription            UserSubscription    @default(FREE)
+  billingCycle            BillingCycle?
   subscriptionUpdatedAt   DateTime?
+  subscriptionStartedAt   DateTime?
+  subscriptionEndsAt      DateTime?
   subscriptionLogs        SubscriptionLog[]
   invitations             Invitation[]
   createdAt               DateTime            @default(now())
@@ -76,24 +79,33 @@ model SubscriptionLog {
   type       UserSubscription
   razorpayId String
   amount     Int
+  billingCycle BillingCycle
+  startDate   DateTime
+  endDate    DateTime?
   createdAt  DateTime         @default(now())
 }
 
 model usage_logs{
     id String @id @default(cuid())
-    userName  String
+    email  String
     feature String
+
     date  DateTime
     durationSeconds  Int @default(0)
     timeZone  String?
     createdAt   DateTime  @default(now())
     updatedAt    DateTime @updatedAt
-    @@unique([userName,date,feature])
-    @@index([userName,date,feature])
+   @@unique([email, date, feature], name: "email_date_feature")
+    @@index([email,date,feature])
 } 
 
 enum UserSubscription {
   FREE
   PRO
   PROPlus
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
 }

@@ -92,7 +92,8 @@ if(title =='PROPlus'){
                 try {
               const subscription = await axios.post('/api/add-user-subscription',{
               email:session?.user?.email,
-              plan:title
+              plan:title,
+              isYearly
             })
            toast.success("Subscription updated!");
             } catch (error) {

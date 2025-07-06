@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {CustomCheckbox} from "@/components/ui/checkbox";
 import { Play, Mic, ScissorsLineDashed,Edit,Video, Users, Sparkles, ArrowRight, Calendar } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -118,11 +118,18 @@ const { data: sessionData, status } = useSession();
            
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
+           <DropdownMenuItem>
+            <button className="font-inter" onClick={() => redirect('/profile')}>
+              Profile
+            </button>
+           
+          </DropdownMenuItem>
+            <DropdownMenuSeparator />
           <DropdownMenuItem>
             <button className="font-inter" onClick={() => signOut()}>
               Log out
             </button>
-            <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+           
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

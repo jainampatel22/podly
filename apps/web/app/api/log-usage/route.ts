@@ -5,9 +5,9 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient()
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  const userName = session?.user?.name;
+  const email = session?.user?.email;
 
-  if (!userName) {
+  if (!email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -18,14 +18,14 @@ export async function POST(req: NextRequest) {
   try {
     await prisma.usage_logs.upsert({
       where: {
-        userName_date_feature: { userName, feature, date },
+        email_date_feature: { email, feature, date },
       },
       update: {
         durationSeconds: { increment: seconds },
         timeZone,
       },
       create: {
-        userName,
+      email,
         feature,
         date,
         durationSeconds: seconds,
@@ -42,9 +42,9 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  const userName = session?.user?.name;
+  const email = session?.user?.email;
 
-  if (!userName) {
+  if (!email) {
     return NextResponse.json({ allowed: false }, { status: 401 });
   }
 
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
 
     const user = await prisma.user.findFirst({
         where:{
-            name:userName
+            name:email
 
         },
         select:{
@@ -73,15 +73,18 @@ console.log("User subscription:", plan);
 const max = planLimits[plan] ?? 10 * 60;
 console.log("Max allowed seconds:", max);
  
-  const usage = await prisma.usage_logs.findUnique({
+  const usage = await prisma.usage_logs.findMany({
     where: {
-      userName_date_feature: { userName, feature, date },
+    email
+    },
+    orderBy:{
+      createdAt:'desc'
     }
   });
 
  
-  const used = usage?.durationSeconds || 0;
+const used = usage.reduce((acc, log) => acc + log.durationSeconds, 0);
   const allowed = used < max;
 
-  return NextResponse.json({ allowed, remaining: max - used });
+  return NextResponse.json({ used ,allowed, remaining: max - used });
 }
