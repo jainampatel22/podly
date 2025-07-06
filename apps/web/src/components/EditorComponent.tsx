@@ -66,12 +66,12 @@ const handleFrameClick = (frameIndex: number) => {
 useEffect(() => {
   const checkUser = async () => {
     try {
-      const user = session?.user?.name;
+      const user = session?.user?.email;
 
       if (!user) return; 
 
-      const res = await axios.post('/api/check-premium-user', { name: user });
-      console.log(res.data)
+      const res = await axios.post('/api/check-premium-user', { email: user });
+      
       setPremiumUser(res.data.plan === "PRO" || res.data.plan =="PROPlus");
     } catch (error) {
       console.error("Failed to check premium status", error);
@@ -85,39 +85,33 @@ useEffect(() => {
   const interval = setInterval(async () => {
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const localDate = new Date().toLocaleDateString("en-CA", { timeZone });
-
+const date = new Date(localDate + 'T00:00:00Z');
     try {
+    
       await axios.post('/api/log-usage', {
         localDate,
         feature: '/studio/editor',
-        seconds: 30,
+        seconds: 5, 
         timeZone,
       }, {
         headers: { 'Content-Type': 'application/json' },
       });
+
+      
+      const res = await axios.get(`/api/log-usage?feature=/studio/editor&localDate=${localDate}`);
+       console.log('Usage response:', res.data);
+      if (!res.data.allowed) {
+        
+toast("You've reached your free limit for today. Come back tomorrow or upgrade to continue! 🚀")
+        router.push('/');
+      }
     } catch (err) {
-      console.error('Log usage failed:', err);
-    }
-  }, 30000); 
-
-  return () => clearInterval(interval);
-}, []);
-
-useEffect(() => {
-  const interval = setInterval(async () => {
-    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const localDate = new Date().toLocaleDateString("en-CA", { timeZone });
-
-    const res = await axios.get(`/api/log-usage?feature=/studio/editor&localDate=${localDate}`);
-    if (!res.data.allowed) {
-      alert('Time limit reached');
-      router.push('/');
+      console.error('Usage tracking failed:', err);
     }
   }, 5000); 
 
   return () => clearInterval(interval);
 }, []);
-
 
 
   

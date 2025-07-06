@@ -1,5 +1,9 @@
 'use client'
-
+type RoomId = {
+  params: {
+    roomId: string;
+  };
+};
 import { redirect, useParams } from "next/navigation"
 import { use, useContext, useEffect, useRef, useState } from "react"
 import { SocketContext } from "../../app/Context/SocketContext"
@@ -28,9 +32,7 @@ import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import LocalFeedPlayer from "./LocalFeedPlayer"
 import axios from "axios"
-type RoomId = {
-    params: string
-}
+
 
 export default function RoomComponent({ params }: RoomId) {
     const router= useRouter()
@@ -51,7 +53,7 @@ export default function RoomComponent({ params }: RoomId) {
     const [isVideoOff, setIsVideoOff] = useState(false)
     const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
     const [recording, setRecording] = useState(false);
-    const [premiumUser,setPremiumUser]=useState(false)
+      const [premiumUser,setPremiumUser]=useState(false)
     const { data: session } = useSession()
 const [imageLoading, setImageLoading] = useState(false);
  
@@ -67,59 +69,65 @@ const [selectedImage, setSelectedImage] = useState<string | null>(null);
 const [customImage, setCustomImage] = useState<string | null>(null);
 
 useEffect(() => {
-  const interval = setInterval(async () => {
-    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const localDate = new Date().toLocaleDateString("en-CA", { timeZone });
-
-    try {
-      await axios.post('/api/log-usage', {
-        localDate,
-        feature: '/studio/room',
-        seconds: 10,
-        timeZone,
-      }, {
-        headers: { 'Content-Type': 'application/json' },
-      });
-    } catch (err) {
-      console.error('Log usage failed:', err);
-    }
-  }, 10000); 
-
-  return () => clearInterval(interval);
-}, []);
-useEffect(() => {
   const checkUser = async () => {
     try {
-      const user = session?.user?.name;
+      const user = session?.user?.email;
 
-      if (!user) return; 
+      if (!user) {
+        console.log('No user email found in session');
+        return; 
+      }
 
-      const res = await axios.post('/api/check-premium-user', { name: user });
-
-      setPremiumUser(res.data === true);
+      console.log('Checking premium status for user:', user);
+      const res = await axios.post('/api/check-premium-user', { email: user });
+      
+      console.log('Premium check response:', res.data);
+      const isPremium = res.data.plan === "PRO" || res.data.plan === "PROPlus";
+      console.log('Setting premium user to:', isPremium);
+      setPremiumUser(isPremium);
     } catch (error) {
       console.error("Failed to check premium status", error);
       setPremiumUser(false); 
     }
   };
 
-  checkUser();
-}, [session]);
-
+  if (session?.user?.email) {
+    checkUser();
+  }
+}, [session?.user?.email]);
 useEffect(() => {
   const interval = setInterval(async () => {
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const localDate = new Date().toLocaleDateString("en-CA", { timeZone });
+const date = new Date(localDate + 'T00:00:00Z');
+    try {
+    
+      await axios.post('/api/log-usage', {
+        localDate,
+        feature: '/studio/room',
+        seconds: 5, 
+        timeZone,
+      }, {
+        headers: { 'Content-Type': 'application/json' },
+      });
 
-    const res = await axios.get(`/api/log-usage?feature=/studio/room&localDate=${localDate}`);
-    if (!res.data.allowed) {
-      alert('Time limit reached');
-      router.push('/');
+      
+      const res = await axios.get(`/api/log-usage?feature=/studio/room&localDate=${localDate}`);
+       console.log('Usage response:', res.data);
+      if (!res.data.allowed) {
+        
+toast("You've reached your free limit for today. Come back tomorrow or upgrade to continue! 🚀")
+        router.push('/');
+      }
+    } catch (err) {
+      console.error('Usage tracking failed:', err);
     }
   }, 5000); 
 
   return () => clearInterval(interval);
 }, []);
+
+
 
 
 const debugImageExists = async (imagePath: string) => {
@@ -673,6 +681,8 @@ const loadBackgroundImages = async () => {
     const uploadToS3 = async (blob: Blob) => {
         try {
             if (!session) throw new Error('User not authenticated');
+            const roomId = params?.roomId;
+
             const res = await fetch('/api/upload-url', {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -925,8 +935,9 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                                 <span className="text-base font-bold text-gray-700">■</span>
                             </Button>
                         )}
-                       {
-                        premiumUser?( <Dialog>
+                                                {
+                         
+                         premiumUser?( <Dialog>
                             <DialogTrigger asChild>
                                 <Button className="flex items-center justify-center w-11 h-11 hover:scale-110 rounded-xl  bg-white text-white shadow-sm hover:bg-gray-100 transition-all duration-150">
                                     <Sparkles className="w-5 h-5 text-gray-700  " />
@@ -1028,6 +1039,7 @@ const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                                 </Button>
                         )
                        }
+                      
                         <Button
                             className={`flex items-center hover:scale-110 justify-center w-11 h-11 rounded-xl border shadow-sm transition-all duration-150 ${
                                 isVideoOff

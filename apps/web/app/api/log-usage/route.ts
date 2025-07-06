@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../../lib/authOptions";
 import { getServerSession } from "next-auth";
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient()
+import { prisma } from "../../lib/prisma";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -14,9 +13,11 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
   const { feature, seconds, localDate, timeZone } = body;
-  const date = new Date(localDate + 'T00:00:00');
+  const date = new Date(localDate + 'T00:00:00Z');
 
   try {
+    console.log(`Logging usage - Email: ${email}, Feature: ${feature}, Date: ${date.toISOString()}, Seconds: ${seconds}`);
+    
     await prisma.usage_logs.upsert({
       where: {
         email_date_feature: { email, date, feature },
@@ -58,9 +59,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
   }
 
-  const today = new Date()
-const utcDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+const date = new Date(localDate + 'T00:00:00Z'); // UTC date from client-sent local day
+
   // Check if the date is valid
+  if (isNaN(date.getTime())) {
+    return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+  }
  
 
   const user = await prisma.user.findFirst({
@@ -73,7 +77,7 @@ const utcDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), t
   });
 
   const planLimits: Record<string, number | null> = {
-    FREE: 10 * 60,
+    FREE: 1* 60,
     PRO: 30 * 60,
     PROPlus: 100 * 60
   };
@@ -85,12 +89,14 @@ const utcDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), t
 
   const usage = await prisma.usage_logs.findUnique({
     where: {
-      email_date_feature: { email, date:utcDate, feature },
+      email_date_feature: { email, date, feature },
     }
   });
 
   const used = usage?.durationSeconds || 0;
   const allowed = used < max;
+
+  console.log(`Usage check - Email: ${email}, Feature: ${feature}, Date: ${date.toISOString()}, Used: ${used}, Max: ${max}, Allowed: ${allowed}`);
 
   return NextResponse.json({ used, allowed, remaining: max - used });
 }
