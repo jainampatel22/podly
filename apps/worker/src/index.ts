@@ -34,11 +34,11 @@ app.post('/send-mail',async(req,res)=>{
     </p>
 
     <p style="font-size: 16px; color: #333;">
-      Please review the invitation and let us know your availability.
+      Please review the invitation and accept it.
     </p>
 
     <div style="margin: 30px 0; text-align: center;">
-      <a href="https://podly-web.vercel.app/invite/${encodeURIComponent(name)}" style="background-color: #2c3e50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-size: 16px;">
+      <a href="https://podler.space/invite/${encodeURIComponent(name)}" style="background-color: #2c3e50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-size: 16px;">
         View & Respond to Invitation
       </a>
     </div>
@@ -54,7 +54,7 @@ app.post('/send-mail',async(req,res)=>{
     <hr style="margin: 30px 0;" />
     <footer style="font-size: 12px; color: #888;">
       Podler Inc. | Connecting Professionals<br/>
-      <a href="https://podler.com" style="color: #888;">www.podler.com</a>
+      <a href="https://podler.space" style="color: #888;">www.podler.com</a>
     </footer>
   </div>
   `
