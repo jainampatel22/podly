@@ -193,8 +193,8 @@ export default function Pricing(){
     },
     {
       title: "PRO",
-      monthlyPrice: 25,
-      yearlyPrice: 2000,
+      monthlyPrice: 149,
+      yearlyPrice: 1500,
       description: "Everything will be limited to 30 minutes of total usage per day.",
       features: [ "Editor with smart features", "captions in video","Enable Virtual Backgrounds"],
       actionLabel: "Get Started",
@@ -202,8 +202,8 @@ export default function Pricing(){
     },
     {
       title: "PROPlus",
-      monthlyPrice: 499,
-      yearlyPrice: 4500,
+      monthlyPrice: 349,
+      yearlyPrice: 3799,
       description: "You can clock unlimited hours.",
       features: ["pre build virtual backgrounds", "Live call Transcription", "Editor Pro"],
       actionLabel: "Get Started",
