@@ -80,7 +80,7 @@ if(title =='PROPlus'){
       return;
     }
             const options = {
-              key:'rzp_test_e0ieOqhIqhit07',
+              key:'rzp_live_1Ygich52hUC4js',
               amount:order.amount,
               currency:order.currency,
               name:"PODLER",
@@ -193,7 +193,7 @@ export default function Pricing(){
     },
     {
       title: "PRO",
-      monthlyPrice: 199,
+      monthlyPrice: 25,
       yearlyPrice: 2000,
       description: "Everything will be limited to 30 minutes of total usage per day.",
       features: [ "Editor with smart features", "captions in video","Enable Virtual Backgrounds"],
