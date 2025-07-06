@@ -689,7 +689,7 @@ const loadBackgroundImages = async () => {
                 body: JSON.stringify({
                     fileType: blob.type,
                     userName: session.user?.name,
-                    roomId: params
+                    roomId: params.roomId
                 })
             });
             if (!res.ok) {

@@ -13,7 +13,7 @@ export default async function Room({ params }: Props) {
 
   return (
     <>
-      <RoomComponent params={id} />
+      <RoomComponent params={{ roomId: id }} />
     </>
   );
 }
