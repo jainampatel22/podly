@@ -187,7 +187,7 @@ export default function Pricing(){
       monthlyPrice: 0,
       yearlyPrice: 0,
       description: "Everything will be limited to 15 minutes of total usage per day.",
-      features: ["Video Calling", "schedule meetings","Basic Editor"],
+      features: ["Video Calling", "schedule meetings","slow video rendering"],
       actionLabel: "Get Started",
       href:'/sign-in'
     },
@@ -196,7 +196,7 @@ export default function Pricing(){
       monthlyPrice: 149,
       yearlyPrice: 1499,
       description: "Everything will be limited to 30 minutes of total usage per day.",
-      features: [ "Editor with smart features", "captions in video","Enable Virtual Backgrounds"],
+      features: [  "captions in video","Enable Virtual Backgrounds","Fast video rendering"],
       actionLabel: "Get Started",
       href:'/pro'
     },
