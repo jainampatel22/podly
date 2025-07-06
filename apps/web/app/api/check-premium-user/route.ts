@@ -15,12 +15,15 @@ export async function POST(req:NextRequest) {
   }
     const { subscription } = checkUser;
     if(subscription === 'PRO'){
-        return NextResponse.json(true); 
+        return NextResponse.json({ premium: true, plan: 'PRO' }); 
     }
     else if (subscription == 'PROPlus'){
-        return NextResponse.json(true); 
+        return NextResponse.json({ premium: true, plan: 'PROPlus' }); 
+    }
+    else if (subscription == 'FREE'){
+        return NextResponse.json({ premium: true, plan: 'FREE' }); 
     }
     else{
-         return NextResponse.json(false); 
+         return NextResponse.json({ premium: false, plan: 'NONE' }); 
     }
 }

@@ -71,8 +71,8 @@ useEffect(() => {
       if (!user) return; 
 
       const res = await axios.post('/api/check-premium-user', { name: user });
-
-      setPremiumUser(res.data === true);
+      console.log(res.data)
+      setPremiumUser(res.data.plan === "PRO" || res.data.plan =="PROPlus");
     } catch (error) {
       console.error("Failed to check premium status", error);
       setPremiumUser(false); 
@@ -334,9 +334,9 @@ document.body.removeChild(a)
 
  {videoFile ? (
 <div className="w-72 bg-black/60 backdrop-blur-md border-r border-white/20 p-6 shadow-lg">
-  <div className="pt-10 pl-2">
-    <div className='mb-20 text-2xl  '>🎬  Video Effects</div>
-    <div className="flex mt-3 ml-4 items-center gap-3 text-white">
+  <div className=" pl-2">
+    <div className='mb-20 p-5 text-2xl  '>🎬  Video Effects</div>
+    <div className="flex -mt-7 ml-4 items-center gap-3 text-white">
       <h1 className="text-2xl mb-2 font-semibold cursor-pointer" onClick={() => {
         setShowScaleInput(false)
         setShowSpeedInput(false)
@@ -350,35 +350,35 @@ document.body.removeChild(a)
      {showTrimInputs && (
           <div className="mt-6 mb-4 space-y-4">
             <div className="flex flex-col text-white text-sm">
-              <p className=" mb-2 -mt-5 text-sm text-white/50 max-w-[180px]">
+              <p className=" mb-2 ml-3 -mt-5 text-sm text-white/50 max-w-[180px]">
       Select a range to trim your video.
     </p>
-              <label htmlFor="trimStart" className="mb-1">Start Time</label>
+              <label htmlFor="trimStart" className="mb-1 ml-3">Start Time</label>
               <input
                 id="trimStart"
                 type="number"
                 value={trimStartFrame}
                 onChange={(e) => setTrimStartFrame(Number(e.target.value))}
                 placeholder="e.g. 0"
-                className="bg-black/30 border border-white/10 rounded px-3 py-2 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="bg-black/30 ml-3 border border-white/10 rounded px-3 py-2 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div className="flex flex-col text-white text-sm">
-              <label htmlFor="trimEnd" className="mb-1">End Time</label>
+              <label htmlFor="trimEnd" className="mb-1 ml-3">End Time</label>
               <input
                 id="trimEnd"
                 type="number"
                 value={trimEndFrame}
                 onChange={(e) => setTrimEndFrame(Number(e.target.value))}
                 placeholder="e.g. 5"
-                className="bg-black/30 border border-white/10 rounded px-3 py-2 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="bg-black/30 border ml-3 border-white/10 rounded px-3 py-2 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
         )}
        
-     <div className="flex mt-3 ml-4 items-center gap-3 text-white">
+     <div className="flex mt-5 ml-4 items-center gap-3 text-white">
       <h1 className="text-2xl  font-semibold cursor-pointer" onClick={()=>{
         toast("Premium subscription is required")
       }} >Merge</h1>
@@ -389,12 +389,12 @@ document.body.removeChild(a)
 
         {
           premiumUser ?(<div className="flex items-center gap-3 text-white">
-      <h1 className="text-2xl ml-4 mt-7 font-semibold cursor-pointer" onClick={() =>{
+      <h1 className="text-2xl ml-4 ml-3 mt-7 font-semibold cursor-pointer" onClick={() =>{
         setShowTrimInputs(false)
         setShowTextInput((prev) => !prev)
         
         } } >Text</h1>
-     <h1 className='mt-7'>💬</h1>
+     <h1 className='mt-7 '>💬</h1>
     </div>
     ):(<div className="flex items-center gap-3 text-white">
       <h1 className="text-2xl ml-4 mt-7 font-semibold cursor-pointer" onClick={() =>{
@@ -410,11 +410,11 @@ document.body.removeChild(a)
       showTextInput && (
         <>
         <div className='mt-5'>
-           <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
+           <p className="mt-2 ml-3 mb-4 text-sm text-white/50 max-w-[180px]">
       Add a Text to your video.
     </p>
- <label htmlFor="Enter Text">Enter Text </label>
-        <Input className='border border-white/20 mt-2' onChange={(e)=>setText(e.target.value)}/>
+ <label htmlFor="Enter Text" className='ml-3'>Enter Text </label>
+        <Input className='border ml-3 border-white/20 mt-2' onChange={(e)=>setText(e.target.value)}/>
         </div>
        
         </>
@@ -435,14 +435,14 @@ document.body.removeChild(a)
       showScaleInput && (
         <>
         <div className='mt-5'>
-          <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
+          <p className="mt-2 mb-4 ml-3 text-sm text-white/50 max-w-[180px]">
       Add a Scale to your video.
     </p>
- <label htmlFor="Enter Text">Enter Width </label>
-        <Input className='border border-white/20 mt-2 mb-2' onChange={(e)=>setWidth(e.target.value)}/>
+ <label htmlFor="Enter Text" className='ml-3'>Enter Width </label>
+        <Input className='border border-white/20 mt-2 mb-2 ml-3' onChange={(e)=>setWidth(e.target.value)}/>
 
-        <label htmlFor="Enter Text">Enter Height </label>
-        <Input className='border border-white/20 mt-2' onChange={(e)=>setHeight(e.target.value)}/>
+        <label htmlFor="Enter Text" className='ml-3'>Enter Height </label>
+        <Input className='border border-white/20 mt-2 ml-3' onChange={(e)=>setHeight(e.target.value)}/>
 
         </div>
        
@@ -484,11 +484,11 @@ document.body.removeChild(a)
       speedInput && (
         <>
         <div className='mt-5'>
-          <p className="mt-2 mb-4 text-sm text-white/50 max-w-[180px]">
+          <p className="mt-2 ml-3 mb-4 text-sm text-white/50 max-w-[180px]">
      Increase or decrease the playback speed 
     </p>
- <label htmlFor="Enter Text">Enter Speed </label>
-        <Input className='border border-white/20 mt-2' placeholder='Range 0.5 - 2.0'  onChange={(e) => setSpeed(parseFloat(e.target.value))}/>
+ <label htmlFor="Enter Text" className='ml-3'>Enter Speed </label>
+        <Input className='border border-white/20 ml-3 mt-2' placeholder='Range 0.5 - 2.0'  onChange={(e) => setSpeed(parseFloat(e.target.value))}/>
         </div>
        
         </>

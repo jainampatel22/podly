@@ -7,15 +7,21 @@ import { Input } from "./ui/input"
 import { redirect } from "next/navigation"
 import { useEffect, useState } from "react"
 import axios from "axios"
-
+type UsageLog = {
+  feature: string;
+  durationSeconds: number;
+  date: string;
+};
 export default function ProfileCard(){
 const {data:session}=useSession()
 const [subscription,setSubscription]=useState('Free')
 const [subscriptionStartDate, setSubscriptionStartDate] = useState<Date | null>(null);
 const [subscriptionEndsDate, setSubscriptionEndsDate] = useState<Date | null>(null);
 const [feature,setFeature]= useState('')
-const [time,setTime]=useState<number | null>(null)
-
+const [usageData, setUsageData] = useState<UsageLog[]>([]);
+const [time,setTime]=useState()
+  const [totalSeconds, setTotalSeconds] = useState(0);
+  const [toggleMore,setToggleMore]=useState(false)
 if(!session){
 redirect('/sign-in')
 }
@@ -50,9 +56,20 @@ useEffect(() => {
 useEffect(()=>{
 const fetchData  = async()=>{
     try {
-        const response = await axios.get('/api/log-usage')
-       
-        setTime(response.data.used)
+         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const localDate = new Date().toLocaleDateString("en-CA", { timeZone });
+const email = session.user?.email
+        const response = await axios.post(`/api/get-user-usage`,{
+        email
+        })
+       console.log(response.data)
+  const total = response.data.reduce(
+          (acc: number, item: { durationSeconds: number }) => acc + item.durationSeconds,
+          0
+        );
+      setUsageData(response.data)
+
+      setTotalSeconds(total);
     } catch (error) {
           console.error("Error fetching user info:", error);
     }
@@ -162,15 +179,57 @@ const imageUrl = session.user?.image
               </>
             )}
 
-            {/* Total Time Section */}
+            
             <div className="mt-6 sm:mt-8">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4">
                 <label htmlFor="TotalTime" className="font-medium text-base sm:text-lg">Total Time spend</label>
                 <div className="border border-black/20 rounded-xl px-3 sm:px-4 py-2 bg-gray-50 text-sm sm:text-base">
-                  {formatDuration(time ?? 0)}
+                  {formatDuration(totalSeconds ?? 0)} Min
                 </div>
               </div>
             </div>
+
+            {
+                toggleMore ? (
+                    <div className="mt-6 sm:mt-8">
+            <label htmlFor="TotalTime" onClick={()=>{
+        setToggleMore(false)
+            }} className="sm:ml-56 font-medium text-base text-blue-700 sm:text-lg">Hide..</label>
+               
+            </div>
+                ):(<div className="mt-6 sm:mt-8">
+            <label htmlFor="TotalTime" onClick={()=>{
+        setToggleMore(true)
+            }} className="sm:ml-56 font-medium text-base text-blue-700 sm:text-lg">More..</label>
+               
+            </div>)
+            }
+
+
+
+          {toggleMore && (
+  <div className="mt-6 sm:mt-8">
+    <label className="font-medium text-base sm:text-lg block mb-3">
+      Feature Usage
+    </label>
+
+    <div className="space-y-3">
+      {usageData.map((item, index) => (
+        <div
+          key={index}
+          className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 border border-black/20 rounded-xl px-3 sm:px-4 py-2 bg-gray-50 text-sm sm:text-base"
+        >
+          <div className="font-medium">{item.feature}</div>
+          <div>{item.durationSeconds} seconds</div>
+        </div>
+      ))}
+    </div>
+
+    
+  </div>
+)}
+
+
 
           </div>
         </div>
