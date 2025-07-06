@@ -145,6 +145,7 @@ useEffect(() => {
 const handleUpload = async (e: React.FormEvent) => {
   e.preventDefault();
  setProcessing(true)
+ toast("it will take approx 1min to render your video in free plan")
     const fileStatus = dropzone.fileStatuses.find(f=>f.status =='success')
     if(!fileStatus){ 
         alert("select video")
@@ -217,7 +218,7 @@ const dropzone = useDropzone({
       accept: {
         "video/*": ['mp4']
       },
-      maxSize: 10 * 1024 * 1024,
+      maxSize: 50 * 1024 * 1024,
       maxFiles:1
     },
   });
@@ -377,7 +378,7 @@ document.body.removeChild(a)
         toast("Premium subscription is required")
       }} >Merge</h1>
       
-      <h1 className='-mt-2'>✂️</h1>
+      <h1 className='-mt-2'>⚒</h1>
       
     </div>
 

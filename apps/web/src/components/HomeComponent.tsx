@@ -8,6 +8,7 @@ import axios from 'axios'
 import { useEffect } from "react";
 import Demo from "./Demo";
 import Footer from "./Footer";
+import StudioDemo from "./StudioDemo";
 
 declare global {
   interface Window {
@@ -18,7 +19,9 @@ declare global {
 export default function HomeComponent(){
     return (
         <>
+        
         <Pricing/>
+          <Demo/>
    <div className="min-h-screen px-3 sm:px-6 lg:px-8">
       <div className="flex flex-col justify-center items-center pt-12 pb-8 sm:pt-16 sm:pb-12 lg:pt-20 lg:pb-16">
         {/* Main Heading */}
@@ -72,7 +75,7 @@ export default function HomeComponent(){
         </div>
       </div>
     </div>
-        <Demo/>
+      <StudioDemo/>
         <Footer/>
         </>
     )

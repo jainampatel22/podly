@@ -186,7 +186,7 @@ export default function Pricing(){
       title: "Free",
       monthlyPrice: 0,
       yearlyPrice: 0,
-      description: "Everything will be limited to 15 minutes of total usage per day.",
+      description: "Everything will be limited to 10 minutes of total usage per day.",
       features: ["Video Calling", "schedule meetings","slow video rendering"],
       actionLabel: "Get Started",
       href:'/sign-in'

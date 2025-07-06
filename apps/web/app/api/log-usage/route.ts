@@ -77,7 +77,7 @@ const date = new Date(localDate + 'T00:00:00Z'); // UTC date from client-sent lo
   });
 
   const planLimits: Record<string, number | null> = {
-    FREE: 1* 60,
+    FREE: 10* 60,
     PRO: 30 * 60,
     PROPlus: 100 * 60
   };
