@@ -193,7 +193,7 @@ export default function Pricing(){
     },
     {
       title: "PRO",
-      monthlyPrice: 25,
+      monthlyPrice: 199,
       yearlyPrice: 2000,
       description: "Everything will be limited to 30 minutes of total usage per day.",
       features: [ "Editor with smart features", "captions in video","Enable Virtual Backgrounds"],
