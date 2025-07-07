@@ -68,7 +68,7 @@ const { data: sessionData, status } = useSession();
       const res = await fetch(url);
       // console.log(`✅ Pinged ${url} - Status: ${res.status}`);
     } catch (error:any) {
-      console.error(`❌ Failed to ping ${url}: ${error.message}`);
+     
     }
   }));
 };
