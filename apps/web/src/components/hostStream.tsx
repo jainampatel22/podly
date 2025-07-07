@@ -47,16 +47,19 @@ export default function HostStream() {
     <div className="flex flex-col items-center mt-8">
       {!stream ? (
         <div className="space-y-6">
-      <Button
+  <Button
   onClick={showVideo}
-  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-lg px-12 py-6 rounded-2xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:scale-105 group relative overflow-hidden"
+  className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-lg px-12 py-6 rounded-2xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 hover:scale-105 group"
 >
-  <span className="relative z-10 flex items-center space-x-2 pt-2 pb-2">
+  {/* Overlay UNDERNEATH and non‑blocking */}
+  <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+  <span className="relative z-10 flex items-center space-x-2 py-2">
     <Video className="w-6 h-6" />
-    <span>Check Camera & Mic</span>
+    <span>Check Camera &amp; Mic</span>
   </span>
-  <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 </Button>
+
 
           {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md">
             <div className="backdrop-blur-sm bg-white/10 border border-white/20 rounded-xl p-4 text-center">
