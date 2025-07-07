@@ -97,7 +97,7 @@ if(title =='PROPlus'){
             })
            toast.success("Subscription updated!");
             } catch (error) {
-                   console.log(error)
+                  //  console.log(error)
                    alert('payment failed')
             }
               },

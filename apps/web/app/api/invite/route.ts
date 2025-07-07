@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    console.log('👉 Incoming request body:', body)
+    // console.log('👉 Incoming request body:', body)
 
     const { reciverName, senderName, date, time, email, subject } = body
 

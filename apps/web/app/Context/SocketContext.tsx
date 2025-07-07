@@ -59,7 +59,7 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
     
     useEffect(() => {
         const handlePeerUsername = ({ peerId, username }: { peerId: string; username: string }) => {
-            console.log('Received peer username:', { peerId, username })
+            // console.log('Received peer username:', { peerId, username })
             dispatch({
                 type: "UPDATE_PEER_USERNAME",
                 payload: { peerId, username },
@@ -68,7 +68,7 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
 
         
         const handleExistingUsers = (existingUsers: {peerId: string, username?: string}[]) => {
-            console.log('Received existing users:', existingUsers)
+            // console.log('Received existing users:', existingUsers)
             existingUsers.forEach(user => {
                 if (user.username) {
                     dispatch({
@@ -95,7 +95,7 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
 
         const handleUserJoined = ({peerId}: {peerId: string}) => {
             const call = user.call(peerId, localStream)
-            console.log("calling the new peer", peerId)
+            // console.log("calling the new peer", peerId)
             call.on('stream', (remoteStream) => {
                 if (peerId !== myPeerId) {
                     dispatch(addPeerAction(peerId, remoteStream))

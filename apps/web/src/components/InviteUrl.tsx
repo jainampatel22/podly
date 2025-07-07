@@ -30,7 +30,7 @@ try {
     const res = await axios.put('/api/invite-status',{
         id,status
     })
-    console.log(res.data.message)
+    // console.log(res.data.message)
      setInvites(prevInvites => prevInvites.filter(invite => invite.id !== id))
 } catch (error) {
     console.error('Failed to update invite:', error)
@@ -39,7 +39,7 @@ try {
     useEffect(()=>{
 const invite = async()=>{
     const res = await axios.get(`/api/invite-for-meet?name=${name}`)
-    console.log(res.data)
+    // console.log(res.data)
     setInvites(res.data)
 }
 invite()

@@ -83,9 +83,9 @@ const date = new Date(localDate + 'T00:00:00Z'); // UTC date from client-sent lo
   };
 
   const plan = user?.subscription ?? "FREE";
-  console.log("User subscription:", plan);
+  // console.log("User subscription:", plan);
   const max = planLimits[plan] ?? 10 * 60;
-  console.log("Max allowed seconds:", max);
+  // console.log("Max allowed seconds:", max);
 
   const usage = await prisma.usage_logs.findUnique({
     where: {
@@ -96,7 +96,7 @@ const date = new Date(localDate + 'T00:00:00Z'); // UTC date from client-sent lo
   const used = usage?.durationSeconds || 0;
   const allowed = used < max;
 
-  console.log(`Usage check - Email: ${email}, Feature: ${feature}, Date: ${date.toISOString()}, Used: ${used}, Max: ${max}, Allowed: ${allowed}`);
+  // console.log(`Usage check - Email: ${email}, Feature: ${feature}, Date: ${date.toISOString()}, Used: ${used}, Max: ${max}, Allowed: ${allowed}`);
 
   return NextResponse.json({ used, allowed, remaining: max - used });
 }

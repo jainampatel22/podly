@@ -51,7 +51,7 @@ export default function Projects() {
  fetch("/api/get-user-video", { credentials: "include" })
       .then(res => res.json())
        .then(data => {
-         console.log("Fetched videos:", data);
+        //  console.log("Fetched videos:", data);
          if (data.error) setError(data.error);
          else setVideos(data);
    });

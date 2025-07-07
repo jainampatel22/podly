@@ -78,12 +78,12 @@ useEffect(() => {
         return; 
       }
 
-      console.log('Checking premium status for user:', user);
+    //   console.log('Checking premium status for user:', user);
       const res = await axios.post('/api/check-premium-user', { email: user });
       
-      console.log('Premium check response:', res.data);
+    //   console.log('Premium check response:', res.data);
       const isPremium = res.data.plan === "PRO" || res.data.plan === "PROPlus";
-      console.log('Setting premium user to:', isPremium);
+    //   console.log('Setting premium user to:', isPremium);
       setPremiumUser(isPremium);
     } catch (error) {
       console.error("Failed to check premium status", error);
@@ -113,14 +113,14 @@ const date = new Date(localDate + 'T00:00:00Z');
 
       
       const res = await axios.get(`/api/log-usage?feature=/studio/room&localDate=${localDate}`);
-       console.log('Usage response:', res.data);
+    //    console.log('Usage response:', res.data);
       if (!res.data.allowed) {
         
 toast("You've reached your free limit for today. Come back tomorrow or upgrade to continue! 🚀")
         router.push('/');
       }
     } catch (err) {
-      console.error('Usage tracking failed:', err);
+    //   console.error('Usage tracking failed:', err);
     }
   }, 5000); 
 
@@ -162,7 +162,7 @@ useEffect(() => {
 
     const loadModelAndStart = async () => {
         try {
-            console.log('Loading BodyPix model...');
+            // console.log('Loading BodyPix model...');
             
             // Try ResNet50 first for better quality
             let net;
@@ -172,16 +172,16 @@ useEffect(() => {
                     outputStride: 16,
                     quantBytes: 2
                 });
-                console.log('ResNet50 model loaded successfully');
+                // console.log('ResNet50 model loaded successfully');
             } catch (resnetError) {
-                console.warn('ResNet50 failed, falling back to MobileNet:', resnetError);
+                // console.warn('ResNet50 failed, falling back to MobileNet:', resnetError);
                 net = await bodyPix.load({
                     architecture: 'MobileNetV1',
                     outputStride: 16,
                     multiplier: 0.75,
                     quantBytes: 2
                 });
-                console.log('MobileNetV1 model loaded successfully');
+                // console.log('MobileNetV1 model loaded successfully');
             }
             
             if (!isMounted) return;
@@ -189,7 +189,6 @@ useEffect(() => {
             netRef.current = net;
             setModelLoaded(true);
 
-            // Load background images
            if (backgroundType === 'image') {
     const img = await loadBackgroundImages();
     if (!img || !img.complete) {
@@ -232,7 +231,7 @@ const loadBackgroundImages = async () => {
     img.src = selectedImage;
     await loadPromise;
     setBackgroundImage(img);
-    console.log('Custom background image set:', img.src);
+    // console.log('Custom background image set:', img.src);
     return img;
   } catch (error) {
     setBackgroundImage(null);
@@ -258,7 +257,7 @@ const loadBackgroundImages = async () => {
             let mediaStream = stream;
             
             if (!mediaStream) {
-                console.log('Getting user media...');
+                // console.log('Getting user media...');
                 mediaStream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         width: { ideal: 1280, min: 640 },
@@ -292,7 +291,7 @@ const loadBackgroundImages = async () => {
                 throw new Error('Video has no dimensions after timeout');
             }
 
-            console.log('📹 Video setup complete:', video.videoWidth, 'x', video.videoHeight);
+            // console.log('📹 Video setup complete:', video.videoWidth, 'x', video.videoHeight);
             
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
@@ -308,7 +307,7 @@ const loadBackgroundImages = async () => {
     };
 
     const startProcessing = (video: HTMLVideoElement, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) => {
-        console.log('🎬 Starting video processing...');
+        // console.log('🎬 Starting video processing...');
         
        
         const processed = canvas.captureStream(25); 
@@ -461,13 +460,13 @@ const loadBackgroundImages = async () => {
                         }
                         
                         ctx.drawImage(backgroundImage, drawX, drawY, drawWidth, drawHeight);
-                        console.log('🖼️ Background image drawn successfully');
+                        // console.log('🖼️ Background image drawn successfully');
                     } catch (error) {
-                        console.error('Error drawing background image:', error);
+                        // console.error('Error drawing background image:', error);
                       
                     }
                 } else {
-                    console.warn('Background image not ready, using gradient');
+                    // console.warn('Background image not ready, using gradient');
                    
                 }
                 break;
@@ -513,7 +512,7 @@ const loadBackgroundImages = async () => {
 
     useEffect(() => {
         if (socket && user && session?.user?.name) {
-            console.log('Sending username:', { peerId: user._id, username: session.user.name })
+            // console.log('Sending username:', { peerId: user._id, username: session.user.name })
             socket.emit('username', {
                 peerId: user._id,
                 username: session.user.name
@@ -525,7 +524,7 @@ const loadBackgroundImages = async () => {
     useEffect(() => {
         if (socket && session?.user?.name) {
             const handlePeerUsername = ({ peerId, username }: { peerId: string, username: string }) => {
-                console.log('Received peer username:', { peerId, username })
+                // console.log('Received peer username:', { peerId, username })
                 dispatch({
                     type: "UPDATE_PEER_USERNAME",
                     payload: { peerId, username }
@@ -533,7 +532,7 @@ const loadBackgroundImages = async () => {
             }
 
             const handleExistingUsers = (existingUsers: { peerId: string, username?: string }[]) => {
-                console.log('Received existing users:', existingUsers)
+                // console.log('Received existing users:', existingUsers)
                 existingUsers.forEach(user => {
                     if (user.username) {
                         dispatch({
@@ -545,7 +544,7 @@ const loadBackgroundImages = async () => {
             }
 
             const handleVideoToggle = ({ peerId, isVideoOff }: { peerId: string, isVideoOff: boolean }) => {
-                console.log('Received video toggle:', { peerId, isVideoOff })
+                // console.log('Received video toggle:', { peerId, isVideoOff })
                 dispatch({
                     type: "UPDATE_PEER_VIDEO_STATUS",
                     payload: { peerId, isVideoOff }
@@ -706,7 +705,7 @@ const loadBackgroundImages = async () => {
                 body: blob,
             });
             if (!uploadRes.ok) throw new Error("Upload failed");
-            console.log('uploaded to s3 successfully', fileName);
+            // console.log('uploaded to s3 successfully', fileName);
             const url ='/explore/projects'
             toast(`🚀 Your video has been recorded successfully`)
             setRecordedChunks([]); // Clear after successful upload

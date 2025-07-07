@@ -37,7 +37,7 @@ export default  function Meetings(){
         try {
           const res = await axios.get('/api/all-invites')
           setInvites(res.data)
-          console.log(res.data)
+          // console.log(res.data)
         } catch (error) {
            console.error('Error fetching invites:', error)
         }

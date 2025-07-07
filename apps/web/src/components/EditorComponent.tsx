@@ -74,7 +74,7 @@ useEffect(() => {
       
       setPremiumUser(res.data.plan === "PRO" || res.data.plan =="PROPlus");
     } catch (error) {
-      console.error("Failed to check premium status", error);
+      // console.error("Failed to check premium status", error);
       setPremiumUser(false); 
     }
   };
@@ -99,7 +99,7 @@ const date = new Date(localDate + 'T00:00:00Z');
 
       
       const res = await axios.get(`/api/log-usage?feature=/studio/editor&localDate=${localDate}`);
-       console.log('Usage response:', res.data);
+      //  console.log('Usage response:', res.data);
       if (!res.data.allowed) {
         
 toast("You've reached your free limit for today. Come back tomorrow or upgrade to continue! 🚀")

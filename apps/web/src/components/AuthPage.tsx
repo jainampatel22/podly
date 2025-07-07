@@ -16,7 +16,7 @@ const callbackUrl = searchParams.get('callbackUrl') || ''
   const handleGoogleSignIn = () => {
     setIsSigningIn(true);
   signIn("google",{callbackUrl:callbackUrl})
-    console.log("Signing in with Google...");
+    // console.log("Signing in with Google...");
   };
 useEffect(()=>{
       if(session){

@@ -62,7 +62,7 @@ const email = session.user?.email
         const response = await axios.post(`/api/get-user-usage`,{
         email
         })
-       console.log(response.data)
+      //  console.log(response.data)
   const total = response.data.reduce(
           (acc: number, item: { durationSeconds: number }) => acc + item.durationSeconds,
           0

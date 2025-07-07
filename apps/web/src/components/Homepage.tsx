@@ -1,5 +1,5 @@
 'use client'
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {CustomCheckbox} from "@/components/ui/checkbox";
@@ -53,7 +53,29 @@ const { data: sessionData, status } = useSession();
       description: "Go and check your recorded videos!"
     },
   ];
-  
+  useEffect(() => {
+    const urls = [
+      'https://podly-h9la.onrender.com',
+      'https://podly-editor.onrender.com',
+      'https://podly-email-system.onrender.com',
+      'https://podly-j8p7.onrender.com',
+      
+    ];
+
+  const wakeUpServers = async () => {
+  await Promise.all(urls.map(async (url) => {
+    try {
+      const res = await fetch(url);
+      // console.log(`✅ Pinged ${url} - Status: ${res.status}`);
+    } catch (error:any) {
+      console.error(`❌ Failed to ping ${url}: ${error.message}`);
+    }
+  }));
+};
+
+
+    wakeUpServers();
+  }, []);
   const handleExplore = () => {
     const selectedOption = options.find((option) => option.value === contentType);
     if(selectedOption && typeof selectedOption.href == 'string' ){

@@ -28,7 +28,7 @@ export default function LocalFeedPlayer({stream}:UserFleedPlayerProps){
         }
     }
 
-    console.log("Rendering video", { stream });
+    // console.log("Rendering video", { stream });
 
 return (
     <>
