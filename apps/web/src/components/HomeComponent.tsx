@@ -7,7 +7,7 @@ import Pricing from "./Pricing";
 import axios from 'axios'
 import { useEffect } from "react";
 import Demo from "./Demo";
-import Footer from "./Footer";
+
 import StudioDemo from "./StudioDemo";
 
 declare global {
@@ -76,7 +76,7 @@ export default function HomeComponent(){
       </div>
     </div>
       <StudioDemo/>
-        <Footer/>
+
         </>
     )
 }
